@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import GameBoard from './components/GameBoard';
 import WinnerOverlay from './components/WinnerOverlay';
 import MovingCard from './components/MovingCard';
+import { CARD_WORDS } from './constants/words';
 import './App.scss';
 
 function App() {
@@ -15,10 +16,10 @@ function App() {
   const gameboardRef = useRef(null);
 
   const initializeGame = () => {
-    const newDeck = [];
-    for (let i = 1; i <= 32; i++) {
-      newDeck.push({ id: i, number: i });
-    }
+    const newDeck = CARD_WORDS.map((word, index) => ({
+      id: index,
+      word: word
+    }));
     
     // Shuffle deck
     for (let i = newDeck.length - 1; i > 0; i--) {
@@ -63,18 +64,49 @@ function App() {
   const handlePlayCard = (cardIndex) => {
     const updatedPlayers = [...players];
     const card = updatedPlayers[currentPlayer].cards[cardIndex];
-    updatedPlayers[currentPlayer].cards.splice(cardIndex, 1);
     
-    setTableCards([...tableCards, card]);
-    setCardPositions([...cardPositions, getRandomShift()]);
+    // Get source and target positions
+    const cardElement = gameboardRef.current.querySelector(`.open-hand .card:nth-child(${cardIndex + 1})`);
+    const tableElement = gameboardRef.current.querySelector('.table');
     
-    if (updatedPlayers[currentPlayer].cards.length === 0) {
-      setWinner(currentPlayer);
-    } else {
-      setCurrentPlayer((currentPlayer + 1) % 2);
+    if (cardElement && tableElement) {
+      const startPos = getElementPosition(cardElement);
+      const tablePos = getElementPosition(tableElement);
+      const shift = getRandomShift();
+      
+      // Calculate end position with random shift
+      const endPos = {
+        x: tablePos.x + shift.x,
+        y: tablePos.y + shift.y
+      };
+
+      // Start animation
+      setMovingCard({
+        startPos,
+        endPos,
+        card,
+        rotation: shift.rotation
+      });
+
+      // Remove card from player's hand immediately
+      updatedPlayers[currentPlayer].cards.splice(cardIndex, 1);
+      setPlayers(updatedPlayers);
+
+      // Delay the actual card placement on table until animation completes
+      const timer = setTimeout(() => {
+        setTableCards([...tableCards, card]);
+        setCardPositions([...cardPositions, shift]);
+        setMovingCard(null);
+
+        if (updatedPlayers[currentPlayer].cards.length === 0) {
+          setWinner(currentPlayer);
+        } else {
+          setCurrentPlayer((currentPlayer + 1) % 2);
+        }
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
-    
-    setPlayers(updatedPlayers);
   };
 
   const getElementPosition = (element) => {
@@ -97,15 +129,18 @@ function App() {
         const startPos = getElementPosition(deckElement);
         const endPos = getElementPosition(playerHandElement);
 
-        // Start animation
+        const newCard = deck[0]; // Get the card that will be drawn
+
+        // Start animation with the actual card data
         setMovingCard({
           startPos,
-          endPos
+          endPos,
+          card: newCard, // Pass the card that's being drawn
+          faceDown: true // Keep the card face down during animation
         });
 
         // The actual card movement logic will be executed after animation
         const updatedPlayers = [...players];
-        const newCard = deck[0];
         
         // Delay the actual state updates until animation completes
         const timer = setTimeout(() => {
@@ -114,7 +149,7 @@ function App() {
           setPlayers(updatedPlayers);
           setCurrentPlayer((currentPlayer + 1) % 2);
           setMovingCard(null);
-        }, 500); // Match this with animation duration
+        }, 500);
 
         return () => clearTimeout(timer);
       }
@@ -143,6 +178,8 @@ function App() {
           startPosition={movingCard.startPos}
           endPosition={movingCard.endPos}
           onAnimationEnd={() => setMovingCard(null)}
+          card={movingCard.card}
+          rotation={movingCard.rotation}
         />
       )}
     </div>

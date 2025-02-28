@@ -2,23 +2,30 @@ import { useEffect, useState } from 'react';
 import Card from './Card';
 import './MovingCard.scss';
 
-export default function MovingCard({ startPosition, endPosition, onAnimationEnd }) {
+export default function MovingCard({ 
+  startPosition, 
+  endPosition, 
+  onAnimationEnd,
+  card,
+  rotation = 0
+}) {
   const [position, setPosition] = useState(startPosition);
+  const [currentRotation, setCurrentRotation] = useState(0);
   const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
-    // Start animation in the next frame to ensure the initial position is applied
     requestAnimationFrame(() => {
       setPosition(endPosition);
+      setCurrentRotation(rotation);
     });
 
     const timer = setTimeout(() => {
       setIsAnimating(false);
       onAnimationEnd();
-    }, 500); // Match this with CSS animation duration
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [endPosition, onAnimationEnd]);
+  }, [endPosition, rotation, onAnimationEnd]);
 
   if (!isAnimating) return null;
 
@@ -28,10 +35,10 @@ export default function MovingCard({ startPosition, endPosition, onAnimationEnd 
       style={{
         left: 0,
         top: 0,
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        transform: `translate(${position.x}px, ${position.y}px) rotate(${currentRotation}deg)`,
       }}
     >
-      <Card faceDown={true} />
+      <Card card={card} faceDown={false} />
     </div>
   );
 } 

@@ -6,7 +6,7 @@ function Card({ card, faceDown, small, onClick }) {
       className={`card ${faceDown ? 'face-down' : ''} ${small ? 'small' : ''}`}
       onClick={onClick}
     >
-      {!faceDown && <span className="card-number">{card.number}</span>}
+      {!faceDown && <span className="card-word">{card.word}</span>}
     </div>
   );
 }
