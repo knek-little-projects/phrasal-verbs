@@ -2,6 +2,7 @@ import Card from './Card';
 import Deck from './Deck';
 import OpenHand from './OpenHand';
 import OpponentHand from './OpponentHand';
+import CardHeap from './CardHeap';
 import './GameBoard.scss';
 import * as utils from '../utils';
 
@@ -20,6 +21,8 @@ export default function GameBoard({
     return utils.isCardPlayable(card, tableCards[tableCards.length - 1])
   }
 
+  const randomizedCardPositions = utils.generateCardPositions(tableCards.length, 30, 30, 20);
+
   return (
     <div className="game-board">
       <div className="opponents">
@@ -37,19 +40,7 @@ export default function GameBoard({
       <div className="table">
         {deck.length > 0 && <Deck count={deck.length} />}
         
-        {tableCards.map((card, index) => (
-          <div
-            key={index}
-            className="table-card"
-            style={{
-              position: 'absolute',
-              transform: `translate(${cardPositions[index]?.x}px, ${cardPositions[index]?.y}px) rotate(${cardPositions[index]?.rotation}deg)`,
-              '--card-index': index
-            }}
-          >
-            <Card card={card} faceDown={false} />
-          </div>
-        ))}
+        <CardHeap tableCards={tableCards} cardPositions={randomizedCardPositions} />
       </div>
 
       <div className="player-name">{`Player ${currentPlayer + 1}`}</div>

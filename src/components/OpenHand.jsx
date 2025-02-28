@@ -1,17 +1,9 @@
 import Card from './Card';
 import './OpenHand.scss';
 import React from 'react';
+import { calculateRotation } from '../utils';
 
 function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
-  const calculateRotation = (index, total) => {
-    // Calculate angle from -30 to +30 degrees based on position
-    const maxAngle = 5
-    const startAngle = -maxAngle;
-    const endAngle = maxAngle
-    const step = total > 1 ? (endAngle - startAngle) / (total - 1) : 0;
-    return startAngle + (step * index);
-  };
-
   const [selectedCardIndex, setSelectedCardIndex] = React.useState(null);
 
   const handleCardClick = (index) => {
