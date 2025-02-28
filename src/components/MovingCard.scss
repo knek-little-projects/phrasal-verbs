@@ -1,0 +1,6 @@
+.moving-card {
+  position: absolute;
+  z-index: 1000;
+  transition: transform 0.5s ease-out;
+  pointer-events: none;
+} 

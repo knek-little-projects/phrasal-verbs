@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import GameBoard from './components/GameBoard';
 import WinnerOverlay from './components/WinnerOverlay';
+import MovingCard from './components/MovingCard';
 import './App.scss';
 
 function App() {
@@ -10,6 +11,8 @@ function App() {
   const [tableCards, setTableCards] = useState([]);
   const [cardPositions, setCardPositions] = useState([]);
   const [winner, setWinner] = useState(null);
+  const [movingCard, setMovingCard] = useState(null);
+  const gameboardRef = useRef(null);
 
   const initializeGame = () => {
     const newDeck = [];
@@ -74,20 +77,52 @@ function App() {
     setPlayers(updatedPlayers);
   };
 
+  const getElementPosition = (element) => {
+    const rect = element.getBoundingClientRect();
+    const gameboardRect = gameboardRef.current.getBoundingClientRect();
+    
+    return {
+      x: rect.left - gameboardRect.left + rect.width / 2,
+      y: rect.top - gameboardRect.top + rect.height / 2
+    };
+  };
+
   const handleSkipTurn = () => {
     if (deck.length > 0) {
-      const updatedPlayers = [...players];
-      const newCard = deck[0];
-      updatedPlayers[currentPlayer].cards.push(newCard);
+      // Get deck and current player hand positions
+      const deckElement = gameboardRef.current.querySelector('.deck');
+      const playerHandElement = gameboardRef.current.querySelector('.open-hand');
       
-      setDeck(deck.slice(1));
-      setPlayers(updatedPlayers);
-      setCurrentPlayer((currentPlayer + 1) % 2);
+      if (deckElement && playerHandElement) {
+        const startPos = getElementPosition(deckElement);
+        const endPos = getElementPosition(playerHandElement);
+
+        // Start animation
+        setMovingCard({
+          startPos,
+          endPos
+        });
+
+        // The actual card movement logic will be executed after animation
+        const updatedPlayers = [...players];
+        const newCard = deck[0];
+        
+        // Delay the actual state updates until animation completes
+        const timer = setTimeout(() => {
+          updatedPlayers[currentPlayer].cards.push(newCard);
+          setDeck(deck.slice(1));
+          setPlayers(updatedPlayers);
+          setCurrentPlayer((currentPlayer + 1) % 2);
+          setMovingCard(null);
+        }, 500); // Match this with animation duration
+
+        return () => clearTimeout(timer);
+      }
     }
   };
 
   return (
-    <div className="app">
+    <div className="app" ref={gameboardRef}>
       <GameBoard
         players={players}
         currentPlayer={currentPlayer}
@@ -101,6 +136,13 @@ function App() {
         <WinnerOverlay 
           winner={winner} 
           onRestart={initializeGame}
+        />
+      )}
+      {movingCard && (
+        <MovingCard
+          startPosition={movingCard.startPos}
+          endPosition={movingCard.endPos}
+          onAnimationEnd={() => setMovingCard(null)}
         />
       )}
     </div>
