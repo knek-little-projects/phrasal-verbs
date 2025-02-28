@@ -1,4 +1,6 @@
 import Card from './Card';
+import Deck from './Deck';
+import OpenHand from './OpenHand';
 import './GameBoard.scss';
 
 function GameBoard({ 
@@ -9,7 +11,8 @@ function GameBoard({
   winner,
   onPlayCard,
   onSkipTurn,
-  onRestart
+  onRestart,
+  deck
 }) {
   return (
     <div className="game-board">
@@ -45,6 +48,8 @@ function GameBoard({
           </div>
 
           <div className="table">
+            {deck.length > 0 && <Deck count={deck.length} />}
+            
             {tableCards.map((card, index) => (
               <div
                 key={index}
@@ -60,20 +65,12 @@ function GameBoard({
             ))}
           </div>
 
-          <div className="current-player">
-            <div className="player-name">Player {currentPlayer + 1}</div>
-            <div className="player-cards">
-              {players[currentPlayer]?.cards.map((card, index) => (
-                <Card 
-                  key={index}
-                  card={card}
-                  faceDown={false}
-                  onClick={() => onPlayCard(index)}
-                />
-              ))}
-              <button className="skip-button" onClick={onSkipTurn}>Skip</button>
-            </div>
-          </div>
+          <OpenHand 
+            cards={players[currentPlayer]?.cards || []}
+            onPlayCard={onPlayCard}
+            onSkipTurn={onSkipTurn}
+            playerName={`Player ${currentPlayer + 1}`}
+          />
         </>
       )}
     </div>

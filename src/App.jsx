@@ -96,6 +96,7 @@ function App() {
         onPlayCard={handlePlayCard}
         onSkipTurn={handleSkipTurn}
         onRestart={initializeGame}
+        deck={deck}
       />
     </div>
   );
