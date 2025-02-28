@@ -4,7 +4,7 @@ function Card({ card, faceDown, small, onClick, disabled }) {
   return (
     <div 
       className={`card ${faceDown ? 'face-down' : ''} ${small ? 'small' : ''} ${disabled ? 'disabled' : ''}`}
-      onClick={disabled ? undefined : onClick}
+      onClick={onClick}
       style={!faceDown ? { 
         borderTop: `3px solid ${card.color}`,
       } : {}}

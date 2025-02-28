@@ -15,7 +15,7 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
   const [selectedCardIndex, setSelectedCardIndex] = React.useState(null);
 
   const handleCardClick = (index) => {
-    if (selectedCardIndex === index) {
+    if (selectedCardIndex === index && isCardPlayable(cards[index])) {
       // Second click on the same card - play it
       onPlayCard(index);
       setSelectedCardIndex(null);
@@ -23,6 +23,11 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
       // First click - just select the card
       setSelectedCardIndex(index);
     }
+  };
+
+  const handleSkipClick = () => {
+    onSkipTurn();
+    setSelectedCardIndex(null);
   };
 
   return (
@@ -44,7 +49,7 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
             />
           </div>
         ))}
-        <div className="card skip-card" onClick={onSkipTurn}>Skip</div>
+        <div className="card skip-card" onClick={handleSkipClick}>Skip</div>
       </div>
     </div>
   );

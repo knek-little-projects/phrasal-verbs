@@ -35,7 +35,7 @@ $card-category-color: #7f8c8d;
   }
 
   &:hover {
-    transform: translateY(-5px);
+    // transform: translateY(-5px);
   }
 
   &.face-down {
@@ -180,10 +180,6 @@ $card-category-color: #7f8c8d;
 }
 
 .skip-card {
-  &:hover {
-    transform: translateY(-5px);
-  }
-
   color: white;
   cursor: pointer;
   background: #e74c3c;
