@@ -1,0 +1,13 @@
+.app {
+  width: 100vw;
+  height: 100vh;
+  background: #2c3e50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; // Prevent scrolling
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
+} 

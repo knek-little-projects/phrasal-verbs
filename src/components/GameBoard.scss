@@ -1,0 +1,66 @@
+.game-board {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
+
+  .opponents {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: 768px) {
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .table {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px; // Ensure minimum space for cards
+
+    @media (max-width: 768px) {
+      min-height: 150px;
+    }
+  }
+
+  .player-cards {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+
+    @media (max-width: 768px) {
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap; // Allow cards to wrap on small screens
+    }
+  }
+
+  .skip-button {
+    padding: 1rem 2rem;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    @media (max-width: 768px) {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+    }
+    
+    &:hover {
+      background: #c0392b;
+    }
+  }
+} 
