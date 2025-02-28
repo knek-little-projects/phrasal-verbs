@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import GameBoard from './components/GameBoard';
+import WinnerOverlay from './components/WinnerOverlay';
 import './App.scss';
 
 function App() {
@@ -92,12 +93,16 @@ function App() {
         currentPlayer={currentPlayer}
         tableCards={tableCards}
         cardPositions={cardPositions}
-        winner={winner}
         onPlayCard={handlePlayCard}
         onSkipTurn={handleSkipTurn}
-        onRestart={initializeGame}
         deck={deck}
       />
+      {winner !== null && (
+        <WinnerOverlay 
+          winner={winner} 
+          onRestart={initializeGame}
+        />
+      )}
     </div>
   );
 }
