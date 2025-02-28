@@ -1,5 +1,6 @@
 import Card from './Card';
 import './OpenHand.scss';
+import React from 'react';
 
 function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
   const calculateRotation = (index, total) => {
@@ -11,13 +12,26 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
     return startAngle + (step * index);
   };
 
+  const [selectedCardIndex, setSelectedCardIndex] = React.useState(null);
+
+  const handleCardClick = (index) => {
+    if (selectedCardIndex === index) {
+      // Second click on the same card - play it
+      onPlayCard(index);
+      setSelectedCardIndex(null);
+    } else {
+      // First click - just select the card
+      setSelectedCardIndex(index);
+    }
+  };
+
   return (
     <div className="open-hand">
       <div className="player-cards">
         {cards.map((card, index) => (
           <div 
             key={index}
-            className="card-wrapper"
+            className={`card-wrapper ${selectedCardIndex === index ? 'selected' : ''}`}
             style={{
               transform: `rotate(${calculateRotation(index, cards.length)}deg)`,
             }}
@@ -25,7 +39,7 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
             <Card 
               card={card}
               faceDown={false}
-              onClick={() => onPlayCard(index)}
+              onClick={() => handleCardClick(index)}
               disabled={!isCardPlayable(card)}
             />
           </div>

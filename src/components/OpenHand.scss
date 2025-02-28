@@ -85,4 +85,10 @@ $card-offset-mobile: -15px;
   display: flex;
   gap: $gap-cards-container;
   min-width: min-content;
+}
+
+.card-wrapper.selected {
+  transform-origin: bottom center;
+  transform: translateY(-20px) !important;
+  transition: transform 0.2s ease-out;
 } 

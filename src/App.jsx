@@ -82,57 +82,69 @@ function App() {
   };
 
   const handlePlayCard = (cardIndex) => {
+    console.log('handlePlayCard called with index:', cardIndex);
+    
     const updatedPlayers = [...players];
     const card = updatedPlayers[currentPlayer].cards[cardIndex];
     
-    // Use isCardPlayable instead of isValidPlay
+    console.log('Current player:', currentPlayer);
+    console.log('Card to play:', card);
+    
     if (!isCardPlayable(card)) {
-      // Optionally show some feedback to the player
+      console.log('Card is not playable');
       return;
     }
 
-    // Get source and target positions
-    const cardElement = gameboardRef.current.querySelector(`.open-hand .card:nth-child(${cardIndex + 1})`);
+    // Alternative approach - find the selected card
+    let cardElement = gameboardRef.current.querySelector('.open-hand .player-cards .card-wrapper.selected .card');
     const tableElement = gameboardRef.current.querySelector('.table');
     
-    if (cardElement && tableElement) {
-      const startPos = getElementPosition(cardElement);
-      const tablePos = getElementPosition(tableElement);
-      const shift = getRandomShift();
-      
-      // Calculate end position with random shift
-      const endPos = {
-        x: tablePos.x + shift.x,
-        y: tablePos.y + shift.y
-      };
-
-      // Start animation
-      setMovingCard({
-        startPos,
-        endPos,
-        card,
-        rotation: shift.rotation
-      });
-
-      // Remove card from player's hand immediately
-      updatedPlayers[currentPlayer].cards.splice(cardIndex, 1);
-      setPlayers(updatedPlayers);
-
-      // Delay the actual card placement on table until animation completes
-      const timer = setTimeout(() => {
-        setTableCards([...tableCards, card]);
-        setCardPositions([...cardPositions, shift]);
-        setMovingCard(null);
-
-        if (updatedPlayers[currentPlayer].cards.length === 0) {
-          setWinner(currentPlayer);
-        } else {
-          setCurrentPlayer((currentPlayer + 1) % playerCount); // Update to cycle through 4 players
-        }
-      }, 500);
-
-      return () => clearTimeout(timer);
+    console.log('Card element found:', !!cardElement);
+    console.log('Table element found:', !!tableElement);
+    console.log('Trying to find card at index:', cardIndex);
+    
+    if (!cardElement || !tableElement) {
+      console.log('Required elements not found');
+      console.log('DOM structure:', gameboardRef.current.innerHTML);
+      return;
     }
+
+    const startPos = getElementPosition(cardElement);
+    const tablePos = getElementPosition(tableElement);
+    const shift = getRandomShift();
+    
+    // Calculate end position with random shift
+    const endPos = {
+      x: tablePos.x + shift.x,
+      y: tablePos.y + shift.y
+    };
+
+    console.log('Animation positions:', { startPos, endPos });
+
+    // Start animation
+    setMovingCard({
+      startPos,
+      endPos,
+      card,
+      rotation: shift.rotation
+    });
+
+    // Remove card from player's hand immediately
+    updatedPlayers[currentPlayer].cards.splice(cardIndex, 1);
+    setPlayers(updatedPlayers);
+
+    // Delay the actual card placement on table until animation completes
+    setTimeout(() => {
+      setTableCards(prevTableCards => [...prevTableCards, card]);
+      setCardPositions(prevPositions => [...prevPositions, shift]);
+      setMovingCard(null);
+
+      if (updatedPlayers[currentPlayer].cards.length === 0) {
+        setWinner(currentPlayer);
+      } else {
+        setCurrentPlayer((currentPlayer + 1) % playerCount);
+      }
+    }, 500);
   };
 
   const getElementPosition = (element) => {

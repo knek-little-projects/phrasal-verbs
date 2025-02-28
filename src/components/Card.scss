@@ -164,7 +164,13 @@ $card-category-color: #7f8c8d;
   }
 
   &.disabled {
-    opacity: 0.5;
+    background: rgba(128, 128, 128, 1);
+    opacity: 1;
+
+    .card-content {
+      opacity: 0.5;
+    }
+
     cursor: not-allowed;
 
     &:hover {
