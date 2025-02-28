@@ -3,6 +3,11 @@ import './GameSetup.scss';
 
 function GameSetup({ onStart }) {
   const [players, setPlayers] = useState(2);
+  const [initialCards, setInitialCards] = useState(4);
+
+  const handleStart = () => {
+    onStart(players, initialCards);
+  };
 
   return (
     <div className="game-setup">
@@ -19,7 +24,18 @@ function GameSetup({ onStart }) {
             <option value={4}>4 Players</option>
           </select>
         </label>
-        <button onClick={() => onStart(players)}>Start Game</button>
+        <label>
+          Initial Cards per Player:
+          <select 
+            value={initialCards} 
+            onChange={(e) => setInitialCards(parseInt(e.target.value))}
+          >
+            {[2, 3, 4, 5, 6].map(num => (
+              <option key={num} value={num}>{num} Cards</option>
+            ))}
+          </select>
+        </label>
+        <button onClick={handleStart}>Start Game</button>
       </div>
     </div>
   );

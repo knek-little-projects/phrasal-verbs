@@ -18,6 +18,30 @@
     @media (max-width: 768px) {
       gap: 0.5rem;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+  }
+
+  .opponent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    .player-name {
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+
+      @media (max-width: 768px) {
+        font-size: 0.9rem;
+      }
+    }
+
+    .opponent-cards {
+      display: flex;
+      justify-content: center;
     }
   }
 
@@ -26,23 +50,51 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 200px; // Ensure minimum space for cards
+    min-height: 200px;
+    position: relative;
 
     @media (max-width: 768px) {
       min-height: 150px;
     }
+
+    .table-card {
+      position: absolute;
+      transition: transform 0.3s ease;
+      
+      &:nth-child(n+1) {
+        z-index: var(--card-index);
+      }
+    }
   }
 
-  .player-cards {
+  .current-player {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     gap: 1rem;
     margin-top: 2rem;
 
-    @media (max-width: 768px) {
-      gap: 0.5rem;
-      margin-top: 1rem;
-      flex-wrap: wrap; // Allow cards to wrap on small screens
+    .player-name {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+
+      @media (max-width: 768px) {
+        font-size: 1rem;
+      }
+    }
+
+    .player-cards {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+
+      @media (max-width: 768px) {
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+      }
     }
   }
 
@@ -62,5 +114,66 @@
     &:hover {
       background: #c0392b;
     }
+  }
+
+  .winner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+
+    .winner-message {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+      animation: pop-in 0.5s ease-out;
+
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+
+        @media (max-width: 768px) {
+          font-size: 1.5rem;
+        }
+      }
+
+      .restart-button {
+        padding: 1rem 2rem;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        
+        &:hover {
+          background: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+          padding: 0.75rem 1.5rem;
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 } 
