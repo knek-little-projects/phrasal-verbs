@@ -3,6 +3,8 @@ import Deck from './Deck';
 import OpenHand from './OpenHand';
 import OpponentHand from './OpponentHand';
 import './GameBoard.scss';
+import * as utils from '../utils';
+
 
 export default function GameBoard({ 
   players, 
@@ -12,8 +14,12 @@ export default function GameBoard({
   onPlayCard,
   onSkipTurn,
   deck,
-  isCardPlayable
 }) {
+
+  const isCardPlayable = (card) => {
+    return utils.isCardPlayable(card, tableCards[tableCards.length - 1])
+  }
+
   return (
     <div className="game-board">
       <div className="opponents">

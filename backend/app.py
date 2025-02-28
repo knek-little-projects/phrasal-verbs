@@ -99,6 +99,18 @@ def initialize_game():
     player_count = data.get('playerCount', 4)
     start_dealt_cards = data.get('startDealtCardsCount', 8)
     
+    # Check if the game already exists
+    if game_id in game_states:
+        return jsonify({
+            'deck': game_states[game_id].deck,
+            'players': game_states[game_id].players,
+            'currentPlayer': game_states[game_id].current_player,
+            'tableCards': game_states[game_id].table_cards,
+            'cardPositions': game_states[game_id].card_positions,
+            'winner': game_states[game_id].winner
+        })
+    
+    # Initialize a new game if it doesn't exist
     game_states[game_id] = GameState(player_count, start_dealt_cards)
     
     return jsonify({

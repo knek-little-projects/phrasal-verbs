@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import verbsData from '../constants/verbs.json';
+import { isCardPlayable } from '../utils/utils';
 
 export function useGameEngine(playerCount = 4, startDealtCardsCount = 8) {
   const [deck, setDeck] = useState([]);
@@ -70,34 +71,11 @@ export function useGameEngine(playerCount = 4, startDealtCardsCount = 8) {
     };
   };
 
-  const isCardPlayable = (card) => {
-    if (tableCards.length === 0) return true;
-
-    const topCard = tableCards[tableCards.length - 1];
-    
-    if (card.matches && topCard.matches) {
-      const intersection = card.matches.filter(category => 
-        topCard.matches.includes(category)
-      );
-      if (intersection.length > 0) return true;
-    } else if (card.matches) {
-      if (card.matches.includes(topCard.category)) return true;
-    } else if (topCard.matches) {
-      if (topCard.matches.includes(card.category)) return true;
-    } else {
-      if (card.category === topCard.category) return true;
-    }
-
-    const cardFirstWord = card.word.split(' ')[0];
-    const topCardFirstWord = topCard.word.split(' ')[0];
-    return cardFirstWord === topCardFirstWord;
-  };
-
   const handlePlayCard = (cardIndex, startPos, tablePos) => {
     const updatedPlayers = [...players];
     const card = updatedPlayers[currentPlayer].cards[cardIndex];
     
-    if (!isCardPlayable(card)) {
+    if (!isCardPlayable(card, tableCards[tableCards.length - 1])) {
       return;
     }
 
@@ -165,6 +143,5 @@ export function useGameEngine(playerCount = 4, startDealtCardsCount = 8) {
     handlePlayCard,
     handleSkipTurn,
     initializeGame,
-    isCardPlayable,
   };
 } 

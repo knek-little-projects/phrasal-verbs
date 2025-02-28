@@ -19,7 +19,6 @@ function App() {
     handlePlayCard,
     handleSkipTurn,
     initializeGame,
-    isCardPlayable,
     error,
   } = useRemoteGameEngine('game1', 4, 8);
 
@@ -72,7 +71,6 @@ function App() {
         onPlayCard={onPlayCard}
         onSkipTurn={onSkipTurn}
         deck={deck}
-        isCardPlayable={isCardPlayable}
       />
       {winner !== null && (
         <WinnerOverlay 
