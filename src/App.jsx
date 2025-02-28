@@ -81,25 +81,8 @@ function App() {
     const updatedPlayers = [...players];
     const card = updatedPlayers[currentPlayer].cards[cardIndex];
     
-    // Check if the play is valid
-    const isValidPlay = () => {
-      // If table is empty, any card is valid
-      if (tableCards.length === 0) return true;
-
-      const topCard = tableCards[tableCards.length - 1];
-      
-      // Same category
-      if (card.category === topCard.category) return true;
-
-      // Same first word
-      const cardFirstWord = card.word.split(' ')[0];
-      const topCardFirstWord = topCard.word.split(' ')[0];
-      if (cardFirstWord === topCardFirstWord) return true;
-
-      return false;
-    };
-
-    if (!isValidPlay()) {
+    // Use isCardPlayable instead of isValidPlay
+    if (!isCardPlayable(card)) {
       // Optionally show some feedback to the player
       return;
     }
