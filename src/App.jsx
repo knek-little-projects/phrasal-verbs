@@ -6,6 +6,9 @@ import verbsData from './constants/verbs.json';
 import './App.scss';
 
 function App() {
+  const playerCount = 4
+  const startDealtCardsCount = 8
+
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState(0);
@@ -14,6 +17,7 @@ function App() {
   const [winner, setWinner] = useState(null);
   const [movingCard, setMovingCard] = useState(null);
   const gameboardRef = useRef(null);
+
 
   const initializeGame = () => {
     // When creating cards, also include matches if they exist
@@ -45,10 +49,10 @@ function App() {
 
     // Deal cards to players
     const newPlayers = [];
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < playerCount; i++) { 
       newPlayers.push({
         id: i,
-        cards: newDeck.splice(0, 4)
+        cards: newDeck.splice(0, startDealtCardsCount) // Update to deal 8 cards
       });
     }
 
@@ -123,7 +127,7 @@ function App() {
         if (updatedPlayers[currentPlayer].cards.length === 0) {
           setWinner(currentPlayer);
         } else {
-          setCurrentPlayer((currentPlayer + 1) % 2);
+          setCurrentPlayer((currentPlayer + 1) % playerCount); // Update to cycle through 4 players
         }
       }, 500);
 
@@ -169,7 +173,7 @@ function App() {
           updatedPlayers[currentPlayer].cards.push(newCard);
           setDeck(deck.slice(1));
           setPlayers(updatedPlayers);
-          setCurrentPlayer((currentPlayer + 1) % 2);
+          setCurrentPlayer((currentPlayer + 1) % playerCount); // Update to cycle through 4 players
           setMovingCard(null);
         }, 500);
 
