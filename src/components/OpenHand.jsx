@@ -15,7 +15,7 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, playerName, isCardPlayable })
             disabled={!isCardPlayable(card)}
           />
         ))}
-        <button className="skip-button" onClick={onSkipTurn}>Skip</button>
+        <div className="card skip-card" onClick={onSkipTurn}>Skip</div>
       </div>
     </div>
   );
