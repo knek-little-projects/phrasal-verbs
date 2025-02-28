@@ -29,6 +29,9 @@ $card-category-color: #7f8c8d;
   @media (max-width: 768px) {
     width: $card-width-mobile;
     height: $card-height-mobile;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
   }
 
   &:hover {
