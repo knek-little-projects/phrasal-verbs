@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import GameBoard from './components/GameBoard';
 import WinnerOverlay from './components/WinnerOverlay';
 import MovingCard from './components/MovingCard';
-import { useGameEngine } from './hooks/useGameEngine';
+import { useRemoteGameEngine } from './hooks/useRemoteGameEngine';
 import './App.scss';
 
 function App() {
@@ -20,7 +20,8 @@ function App() {
     handleSkipTurn,
     initializeGame,
     isCardPlayable,
-  } = useGameEngine(4, 8);
+    error,
+  } = useRemoteGameEngine('game1', 4, 8);
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
@@ -58,6 +59,11 @@ function App() {
 
   return (
     <div className="app" ref={gameboardRef}>
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
       <GameBoard
         players={players}
         currentPlayer={currentPlayer}
