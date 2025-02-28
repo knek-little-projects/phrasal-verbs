@@ -119,6 +119,7 @@ export function useRemoteGameEngine(
   const handleSkipTurn = async (deckPos, handPos) => {
     try {
       setError(null);
+      
       if (deck.length > 0) {
         const newCard = deck[0];
         setMovingCard({
@@ -128,6 +129,30 @@ export function useRemoteGameEngine(
           faceDown: true
         });
 
+        const response = await fetch(`${API_BASE_URL}/game/skip-turn`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            gameId,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error('Failed to skip turn');
+        }
+
+        setTimeout(() => {
+          setDeck(data.deck);
+          setPlayers(data.players);
+          setCurrentPlayer(data.currentPlayer);
+          setMovingCard(null);
+        }, timeout);
+      } else {
+        // Call the server directly when deck is empty
         const response = await fetch(`${API_BASE_URL}/game/skip-turn`, {
           method: 'POST',
           headers: {

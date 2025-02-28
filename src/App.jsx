@@ -45,6 +45,11 @@ function App() {
   };
 
   const onSkipTurn = () => {
+    if (deck.length === 0) {
+      handleSkipTurn();
+      return;
+    }
+
     const deckElement = gameboardRef.current.querySelector('.deck');
     const playerHandElement = gameboardRef.current.querySelector('.open-hand');
     

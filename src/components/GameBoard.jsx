@@ -1,4 +1,3 @@
-import Card from './Card';
 import Deck from './Deck';
 import OpenHand from './OpenHand';
 import OpponentList from './OpponentList';
@@ -11,11 +10,11 @@ export default function GameBoard({
   players, 
   currentPlayer, 
   tableCards, 
-  cardPositions,
   onPlayCard,
   onSkipTurn,
   deck,
 }) {
+  const showSkipOption = true;
 
   const isCardPlayable = (card) => {
     return utils.isCardPlayable(card, tableCards[tableCards.length - 1])
@@ -40,6 +39,7 @@ export default function GameBoard({
         onPlayCard={onPlayCard}
         onSkipTurn={onSkipTurn}
         isCardPlayable={isCardPlayable}
+        showSkipOption={showSkipOption}
       />
     </div>
   );

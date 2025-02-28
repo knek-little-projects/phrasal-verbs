@@ -160,7 +160,8 @@ def skip_turn():
     if game.deck:
         new_card = game.deck.pop(0)
         game.players[game.current_player]['cards'].append(new_card)
-        game.current_player = (game.current_player + 1) % game.player_count
+        
+    game.current_player = (game.current_player + 1) % game.player_count
         
     return jsonify({
         'deck': game.deck,

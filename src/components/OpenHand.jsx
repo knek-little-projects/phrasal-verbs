@@ -3,7 +3,13 @@ import './OpenHand.scss';
 import React from 'react';
 import { calculateRotation } from '../utils';
 
-function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
+function OpenHand({ 
+  cards, 
+  onPlayCard, 
+  onSkipTurn, 
+  isCardPlayable,
+  showSkipOption,
+}) {
   const [selectedCardIndex, setSelectedCardIndex] = React.useState(null);
 
   const handleCardClick = (index) => {
@@ -41,7 +47,7 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
             />
           </div>
         ))}
-        <div className="card skip-card" onClick={handleSkipClick}>Skip</div>
+        {showSkipOption && <div className="card skip-card" onClick={handleSkipClick}>Skip</div>}
       </div>
     </div>
   );
