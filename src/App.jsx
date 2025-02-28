@@ -16,13 +16,14 @@ function App() {
   const gameboardRef = useRef(null);
 
   const initializeGame = () => {
-    // Collect all phrasal verbs with their related words from all categories
+    // When creating cards, also include matches if they exist
     const allVerbs = verbsData.categories.flatMap(category => 
       category.cards.map(card => ({
         phrasal_verb: card.phrasal_verb,
         related_word: card.related_words[Math.floor(Math.random() * card.related_words.length)],
         category: category.name,
-        color: category.color
+        color: category.color,
+        matches: category.matches // Add matches from category
       }))
     );
     
@@ -32,7 +33,8 @@ function App() {
       word: verb.phrasal_verb,
       hint: verb.related_word,
       category: verb.category,
-      color: verb.color
+      color: verb.color,
+      matches: verb.matches // Include matches in card data
     }));
     
     // Shuffle deck
@@ -193,16 +195,31 @@ function App() {
     }
   };
 
-  // Add this function to check if a card can be played
+  // Update the isCardPlayable function
   const isCardPlayable = (card) => {
     if (tableCards.length === 0) return true;
 
     const topCard = tableCards[tableCards.length - 1];
     
-    // Same category
-    if (card.category === topCard.category) return true;
+    // Check categories
+    if (card.matches && topCard.matches) {
+      // If both cards have matches, check for intersection
+      const intersection = card.matches.filter(category => 
+        topCard.matches.includes(category)
+      );
+      if (intersection.length > 0) return true;
+    } else if (card.matches) {
+      // If only player's card has matches
+      if (card.matches.includes(topCard.category)) return true;
+    } else if (topCard.matches) {
+      // If only table card has matches
+      if (topCard.matches.includes(card.category)) return true;
+    } else {
+      // If neither has matches, do direct category comparison
+      if (card.category === topCard.category) return true;
+    }
 
-    // Same first word
+    // Same first word check remains unchanged
     const cardFirstWord = card.word.split(' ')[0];
     const topCardFirstWord = topCard.word.split(' ')[0];
     if (cardFirstWord === topCardFirstWord) return true;

@@ -1,12 +1,31 @@
 {
     "categories": [
       {
-        "name": "General Vocabulary",
+        "name": "General",
         "color": "#3498db",
+        "matches": [
+          "Travel",
+          "Relationships",
+          "Daily Life",
+          "Business",
+          "General"
+        ],
         "cards": [
           {
             "phrasal_verb": "COME ABOUT",
-            "related_words": ["Unexpected", "Decision", "Pregnancy", "Merge", "Expense"]
+            "related_words": ["Unexpected event", "Change in plans", "Decision made", "New opportunity", "Surprising outcome"]
+          },
+          {
+            "phrasal_verb": "BRING UP",
+            "related_words": ["A topic in conversation", "An issue to discuss", "A question to ask", "A concern to address", "A point to mention"]
+          },
+          {
+            "phrasal_verb": "LOOK FOR",
+            "related_words": ["A book to read", "A job to apply for", "Answers to find", "A place to visit", "Help to receive"]
+          },
+          {
+            "phrasal_verb": "TAKE UP",
+            "related_words": ["A new hobby", "An interest to explore", "A sport to play", "A challenge to face", "A course to enroll in"]
           }
         ]
       },
