@@ -11,7 +11,8 @@ export default function GameBoard({
   cardPositions,
   onPlayCard,
   onSkipTurn,
-  deck
+  deck,
+  isCardPlayable
 }) {
   return (
     <div className="game-board">
@@ -50,6 +51,7 @@ export default function GameBoard({
         onPlayCard={onPlayCard}
         onSkipTurn={onSkipTurn}
         playerName={`Player ${currentPlayer + 1}`}
+        isCardPlayable={isCardPlayable}
       />
     </div>
   );

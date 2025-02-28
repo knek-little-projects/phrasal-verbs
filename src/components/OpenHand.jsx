@@ -1,7 +1,7 @@
 import Card from './Card';
 import './OpenHand.scss';
 
-function OpenHand({ cards, onPlayCard, onSkipTurn, playerName }) {
+function OpenHand({ cards, onPlayCard, onSkipTurn, playerName, isCardPlayable }) {
   return (
     <div className="open-hand">
       <div className="player-name">{playerName}</div>
@@ -12,6 +12,7 @@ function OpenHand({ cards, onPlayCard, onSkipTurn, playerName }) {
             card={card}
             faceDown={false}
             onClick={() => onPlayCard(index)}
+            disabled={!isCardPlayable(card)}
           />
         ))}
         <button className="skip-button" onClick={onSkipTurn}>Skip</button>

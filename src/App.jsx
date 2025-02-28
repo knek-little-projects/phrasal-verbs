@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import GameBoard from './components/GameBoard';
 import WinnerOverlay from './components/WinnerOverlay';
 import MovingCard from './components/MovingCard';
-import { CARD_WORDS } from './constants/words';
+import verbsData from './constants/verbs.json';
 import './App.scss';
 
 function App() {
@@ -16,9 +16,23 @@ function App() {
   const gameboardRef = useRef(null);
 
   const initializeGame = () => {
-    const newDeck = CARD_WORDS.map((word, index) => ({
+    // Collect all phrasal verbs with their related words from all categories
+    const allVerbs = verbsData.categories.flatMap(category => 
+      category.cards.map(card => ({
+        phrasal_verb: card.phrasal_verb,
+        related_word: card.related_words[Math.floor(Math.random() * card.related_words.length)],
+        category: category.name,
+        color: category.color
+      }))
+    );
+    
+    // Create deck with one card per phrasal verb
+    const newDeck = allVerbs.map((verb, index) => ({
       id: index,
-      word: word
+      word: verb.phrasal_verb,
+      hint: verb.related_word,
+      category: verb.category,
+      color: verb.color
     }));
     
     // Shuffle deck
@@ -65,6 +79,29 @@ function App() {
     const updatedPlayers = [...players];
     const card = updatedPlayers[currentPlayer].cards[cardIndex];
     
+    // Check if the play is valid
+    const isValidPlay = () => {
+      // If table is empty, any card is valid
+      if (tableCards.length === 0) return true;
+
+      const topCard = tableCards[tableCards.length - 1];
+      
+      // Same category
+      if (card.category === topCard.category) return true;
+
+      // Same first word
+      const cardFirstWord = card.word.split(' ')[0];
+      const topCardFirstWord = topCard.word.split(' ')[0];
+      if (cardFirstWord === topCardFirstWord) return true;
+
+      return false;
+    };
+
+    if (!isValidPlay()) {
+      // Optionally show some feedback to the player
+      return;
+    }
+
     // Get source and target positions
     const cardElement = gameboardRef.current.querySelector(`.open-hand .card:nth-child(${cardIndex + 1})`);
     const tableElement = gameboardRef.current.querySelector('.table');
@@ -156,6 +193,23 @@ function App() {
     }
   };
 
+  // Add this function to check if a card can be played
+  const isCardPlayable = (card) => {
+    if (tableCards.length === 0) return true;
+
+    const topCard = tableCards[tableCards.length - 1];
+    
+    // Same category
+    if (card.category === topCard.category) return true;
+
+    // Same first word
+    const cardFirstWord = card.word.split(' ')[0];
+    const topCardFirstWord = topCard.word.split(' ')[0];
+    if (cardFirstWord === topCardFirstWord) return true;
+
+    return false;
+  };
+
   return (
     <div className="app" ref={gameboardRef}>
       <GameBoard
@@ -166,6 +220,7 @@ function App() {
         onPlayCard={handlePlayCard}
         onSkipTurn={handleSkipTurn}
         deck={deck}
+        isCardPlayable={isCardPlayable}
       />
       {winner !== null && (
         <WinnerOverlay 
