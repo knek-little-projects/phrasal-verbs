@@ -1,10 +1,9 @@
 import Card from './Card';
 import './OpenHand.scss';
 
-function OpenHand({ cards, onPlayCard, onSkipTurn, playerName, isCardPlayable }) {
+function OpenHand({ cards, onPlayCard, onSkipTurn, isCardPlayable }) {
   return (
     <div className="open-hand">
-      <div className="player-name">{playerName}</div>
       <div className="player-cards">
         {cards.map((card, index) => (
           <Card 

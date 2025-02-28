@@ -46,11 +46,12 @@ export default function GameBoard({
         ))}
       </div>
 
+      <div className="player-name">{`Player ${currentPlayer + 1}`}</div>
+
       <OpenHand 
         cards={players[currentPlayer]?.cards || []}
         onPlayCard={onPlayCard}
         onSkipTurn={onSkipTurn}
-        playerName={`Player ${currentPlayer + 1}`}
         isCardPlayable={isCardPlayable}
       />
     </div>
