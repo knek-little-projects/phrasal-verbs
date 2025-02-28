@@ -1,7 +1,7 @@
 import Card from './Card';
 import Deck from './Deck';
 import OpenHand from './OpenHand';
-import OpponentHand from './OpponentHand';
+import OpponentList from './OpponentList';
 import CardHeap from './CardHeap';
 import './GameBoard.scss';
 import * as utils from '../utils';
@@ -25,17 +25,7 @@ export default function GameBoard({
 
   return (
     <div className="game-board">
-      <div className="opponents">
-        {players.map((player, index) => (
-          index !== currentPlayer && (
-            <OpponentHand
-              key={player.id}
-              cards={player.cards}
-              playerName={`Player ${player.id + 1}`}
-            />
-          )
-        ))}
-      </div>
+      <OpponentList players={players} currentPlayer={currentPlayer} />
 
       <div className="table">
         {deck.length > 0 && <Deck count={deck.length} />}
