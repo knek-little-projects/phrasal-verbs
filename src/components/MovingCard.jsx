@@ -14,10 +14,12 @@ export default function MovingCard({
   const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
-    requestAnimationFrame(() => {
-      setPosition(endPosition);
-      setCurrentRotation(rotation);
-    });
+    if (endPosition) {
+      requestAnimationFrame(() => {
+        setPosition(endPosition);
+        setCurrentRotation(rotation);
+      });
+    }
 
     const timer = setTimeout(() => {
       setIsAnimating(false);

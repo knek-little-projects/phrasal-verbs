@@ -121,9 +121,10 @@ export default function GamePage() {
       {movingCard && (
         <MovingCard
           card={movingCard.card}
-          startPos={movingCard.startPos}
-          endPos={movingCard.endPos}
+          startPosition={movingCard.startPos}
+          endPosition={movingCard.endPos}
           rotation={movingCard.rotation}
+          onAnimationEnd={() => {/* handle animation end */}}
         />
       )}
     </div>
