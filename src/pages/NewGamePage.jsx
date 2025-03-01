@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { initializeGame } from '../api';
 import './NewGamePage.scss';
 
 function NewGamePage() {
@@ -39,24 +40,8 @@ function NewGamePage() {
       setIsCreating(true);
       setError('');
       
-      // Call the initialize API to create the game
-      const response = await fetch('http://localhost:5000/api/game/initialize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          gameId,
-          playerCount,
-          startDealtCardsCount,
-          playerName,
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create game');
-      }
+      // Call the initializeGame API to create the game
+      const response = await initializeGame(gameId, playerCount, startDealtCardsCount, playerName);
       
       // Navigate to the waiting page after successful initialization
       navigate(`/waiting/${gameId}`);

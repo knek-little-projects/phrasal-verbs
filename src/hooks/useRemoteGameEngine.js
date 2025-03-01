@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import * as api from '../api'; // Import all API functions from the index.js file
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -29,24 +30,7 @@ export function useRemoteGameEngine({
   const initializeGame = useCallback(async (playerCount, startDealtCardsCount) => {
     try {
       setError(null);
-      const response = await fetch(`${API_BASE_URL}/game/initialize`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          gameId,
-          playerCount,
-          startDealtCardsCount,
-          playerName,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to connect to game server');
-      }
-      
-      const data = await response.json();
+      const data = await api.initializeGame(gameId, playerCount, startDealtCardsCount, playerName);
       
       setDeck(data.deck || []);
       setPlayers(data.players || []);
@@ -61,11 +45,7 @@ export function useRemoteGameEngine({
       setStartDealtCardsCount(data.startDealtCardsCount);
       
       // Start polling if the game hasn't started yet
-      if (!data.gameStarted && data.joinedPlayers < data.playerCount) {
-        setIsPolling(true);
-      } else {
-        setIsPolling(false);
-      }
+      setIsPolling(!data.gameStarted && data.joinedPlayers < data.playerCount);
     } catch (error) {
       setError('Unable to connect to game server. Please check your connection and try again.');
       console.error('Failed to initialize game:', error);
@@ -75,23 +55,7 @@ export function useRemoteGameEngine({
   const joinGame = async () => {
     try {
       setError(null);
-      const response = await fetch(`${API_BASE_URL}/game/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          gameId,
-          playerName,
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to join game');
-      }
-      
-      const data = await response.json();
+      const data = await api.joinGame(gameId, playerName);
       
       setDeck(data.deck || []);
       setPlayers(data.players || []);
@@ -104,11 +68,7 @@ export function useRemoteGameEngine({
       setGameStarted(data.gameStarted || false);
       
       // Start polling if the game hasn't started yet
-      if (!data.gameStarted && data.joinedPlayers < data.playerCount) {
-        setIsPolling(true);
-      } else {
-        setIsPolling(false);
-      }
+      setIsPolling(!data.gameStarted && data.joinedPlayers < data.playerCount);
       
       return data;
     } catch (error) {
@@ -120,13 +80,7 @@ export function useRemoteGameEngine({
 
   const checkGameStatus = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/game/status?gameId=${gameId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to check game status');
-      }
-      
-      const data = await response.json();
+      const data = await api.checkGameStatus(gameId);
       
       if (data.exists) {
         setJoinedPlayers(data.joinedPlayers || 0);
@@ -207,23 +161,7 @@ export function useRemoteGameEngine({
       });
       
       // Send the request to the server
-      const response = await fetch(`${API_BASE_URL}/game/play-card`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          gameId,
-          cardIndex
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to play card');
-      }
-      
-      const data = await response.json();
+      const data = await api.playCard(gameId, cardIndex);
       
       // Update the game state after the animation completes
       setTimeout(() => {
@@ -255,22 +193,7 @@ export function useRemoteGameEngine({
       }
       
       // Send the request to the server
-      const response = await fetch(`${API_BASE_URL}/game/skip-turn`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          gameId
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to skip turn');
-      }
-      
-      const data = await response.json();
+      const data = await api.skipTurn(gameId);
       
       if (deckPos && handPos) {
         // Update the game state after the animation completes
@@ -296,23 +219,7 @@ export function useRemoteGameEngine({
   const restartGame = async () => {
     try {
       setError(null);
-      const response = await fetch(`${API_BASE_URL}/game/restart`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          gameId,
-          playerName 
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to restart game');
-      }
-
-      const data = await response.json();
+      const data = await api.restartGame(gameId, playerName);
       setDeck(data.deck);
       setPlayers(data.players);
       setCurrentPlayer(data.currentPlayer);
@@ -329,19 +236,11 @@ export function useRemoteGameEngine({
   const getGameState = useCallback(async () => {
     try {
       setError(null);
-      const response = await fetch(`${API_BASE_URL}/game/state?gameId=${gameId}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get game state');
-      }
-      
-      const data = await response.json();
+      const data = await api.getGameState(gameId);
       
       setDeck(data.deck || []);
       setPlayers(data.players || []);
-
-      setCurrentPlayer(data.currentPlayer)
+      setCurrentPlayer(data.currentPlayer);
       if (data.currentPlayer == null) {
         throw new Error('[server error] Current player is null');
       }
@@ -364,11 +263,7 @@ export function useRemoteGameEngine({
       }
       
       // Start polling if the game hasn't started yet
-      if (data.waitingForPlayers) {
-        setIsPolling(true);
-      } else {
-        setIsPolling(false);
-      }
+      setIsPolling(data.waitingForPlayers);
       
       return data;
     } catch (error) {

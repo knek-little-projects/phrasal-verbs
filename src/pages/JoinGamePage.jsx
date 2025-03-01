@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
 import ActiveGamesList from '../components/ActiveGamesList';
+import { fetchActiveGames, fetchGameStatus } from '../api';
 import './JoinGamePage.scss';
 
 function JoinGamePage() {
@@ -13,15 +13,9 @@ function JoinGamePage() {
 
   useEffect(() => {
     // Fetch active games from the server
-    const fetchActiveGames = async () => {
+    const loadActiveGames = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/game/active');
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch active games');
-        }
-        
-        const data = await response.json();
+        const data = await fetchActiveGames();
         setActiveGames(data.games || []);
       } catch (error) {
         console.error('Error fetching active games:', error);
@@ -31,7 +25,7 @@ function JoinGamePage() {
       }
     };
     
-    fetchActiveGames();
+    loadActiveGames();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -44,8 +38,7 @@ function JoinGamePage() {
     
     try {
       // Check if the game exists before navigating
-      const response = await fetch(`http://localhost:5000/api/game/status?gameId=${gameId}`);
-      const data = await response.json();
+      const data = await fetchGameStatus(gameId);
       
       if (!data.exists) {
         setError('Game not found. Please check the game name and try again.');
