@@ -30,7 +30,11 @@ function GamePage() {
     initializeGame,
     restartGame,
     error,
-  } = useRemoteGameEngine(gameId, playerCount, startDealtCardsCount);
+  } = useRemoteGameEngine({
+    gameId, 
+    playerCount, 
+    startDealtCardsCount,
+  });
 
   useEffect(() => {
     // Initialize the game when the component mounts

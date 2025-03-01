@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
-export function useRemoteGameEngine(
+export function useRemoteGameEngine({
   gameId, 
   playerCount = 4, 
   startDealtCardsCount = 8,
   timeout = 1000,
-) {
+}) {
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState(0);
