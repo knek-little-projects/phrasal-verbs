@@ -3,6 +3,8 @@ import { formatDistanceToNow } from 'date-fns';
 import Loader from '../components/Loader';
 
 const ActiveGamesList = ({ activeGames, loading, handleJoinGame }) => {
+  const userName = localStorage.getItem('userName');
+  
   const formatTime = (isoString) => {
     try {
       return formatDistanceToNow(new Date(isoString), { addSuffix: true });
@@ -56,7 +58,7 @@ const ActiveGamesList = ({ activeGames, loading, handleJoinGame }) => {
                 className="join-button"
                 onClick={() => handleJoinGame(game.id)}
               >
-                {game.gameStarted ? 'Spectate' : 'Join'}
+                {game.gameStarted && !game.players.includes(userName) ? 'Spectate' : 'Join'}
               </button>
             </li>
           ))}

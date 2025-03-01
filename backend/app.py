@@ -11,10 +11,12 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 VERBS_FILE = os.path.join(os.path.dirname(__file__), '../src/constants/verbs.json')
 
 class GameState:
-    def __init__(self, player_count, start_dealt_cards_count):
+    def __init__(self, player_count, start_dealt_cards_count, game_id):
         assert player_count > 1, 'Player count must be greater than 0'
         assert start_dealt_cards_count > 0, 'Start dealt cards count must be greater than 0'
+        assert game_id is not None, 'Game ID is required'
 
+        self.game_id = game_id
         self.player_count = player_count
         self.start_dealt_cards_count = start_dealt_cards_count
         self.deck = []
@@ -106,6 +108,26 @@ class GameState:
         top_card_first_word = top_card['word'].split()[0]
         return card_first_word == top_card_first_word
 
+    def to_dict(self):
+        return {
+            'id': self.game_id,
+            'deck': self.deck,
+            'players': self.players,
+            'currentPlayer': self.current_player,
+            'tableCards': self.table_cards,
+            'cardPositions': self.card_positions,
+            'winner': self.winner,
+            'playerNames': self.player_names,
+            'joinedPlayers': self.joined_players,
+            'playerCount': self.player_count,
+            'startDealtCardsCount': self.start_dealt_cards_count,
+            'gameStarted': self.game_started,
+            'waitingForPlayers': self.joined_players < self.player_count and not self.game_started,
+            'isFinished': self.winner is not None,
+            'hasWinner': self.winner is not None,
+            'lastPlayedTime': self.last_played_time,
+        }
+
 game_states = {}
 
 @app.route('/api/game/initialize', methods=['POST'])
@@ -129,7 +151,7 @@ def initialize_game():
         return jsonify({'error': 'Player name is required.'}), 400
 
     # Initialize a new game if it doesn't exist
-    game_states[game_id] = GameState(player_count, start_dealt_cards)
+    game_states[game_id] = GameState(player_count, start_dealt_cards, game_id)
     game = game_states[game_id]
     
     # Set the first player's name if provided
@@ -138,19 +160,7 @@ def initialize_game():
     # Mark the first player as joined
     game.joined_players = 1
     
-    return jsonify({
-        'deck': game.deck,
-        'players': game.players,
-        'currentPlayer': game.current_player,
-        'tableCards': game.table_cards,
-        'cardPositions': game.card_positions,
-        'winner': game.winner,
-        'playerNames': game.player_names,
-        'joinedPlayers': game.joined_players,
-        'playerCount': game.player_count,
-        'startDealtCardsCount': game.start_dealt_cards_count,
-        'gameStarted': game.game_started
-    })
+    return jsonify(game.to_dict())
 
 @app.route('/api/game/join', methods=['POST'])
 def join_game():
@@ -186,18 +196,7 @@ def join_game():
             game.game_started = True
 
     
-    return jsonify({
-        'deck': game.deck,
-        'players': game.players,
-        'currentPlayer': game.current_player,
-        'tableCards': game.table_cards,
-        'cardPositions': game.card_positions,
-        'winner': game.winner,
-        'playerNames': game.player_names,
-        'joinedPlayers': game.joined_players,
-        'playerCount': game.player_count,
-        'gameStarted': game.game_started
-    })
+    return jsonify(game.to_dict())
 
 @app.route('/api/game/play-card', methods=['POST'])
 def play_card():
@@ -277,7 +276,7 @@ def restart_game():
         player_names = game_states[game_id].player_names  # Save player names
         
         # Create a new game state with the same settings
-        game_states[game_id] = GameState(player_count, start_dealt_cards)
+        game_states[game_id] = GameState(player_count, start_dealt_cards, game_id)
         game = game_states[game_id]
         
         # Restore player names
@@ -287,37 +286,15 @@ def restart_game():
         # Initialize the game since all players are already joined
         game.initialize_game()
         
-        return jsonify({
-            'deck': game.deck,
-            'players': game.players,
-            'currentPlayer': game.current_player,
-            'tableCards': game.table_cards,
-            'cardPositions': game.card_positions,
-            'winner': game.winner,
-            'playerNames': game.player_names,
-            'joinedPlayers': game.joined_players,
-            'playerCount': game.player_count,
-            'startDealtCardsCount': game.start_dealt_cards_count,
-            'gameStarted': game.game_started
-        })
+        return jsonify(game.to_dict())
     else:
         return jsonify({'error': 'Game not found'}), 404
 
 @app.route('/api/game/active', methods=['GET'])
 def get_active_games():
     active_games = []
-    for game_id, game in game_states.items():
-        active_games.append({
-            'id': game_id,
-            'playerCount': game.player_count,
-            'joinedPlayers': game.joined_players,
-            'startDealtCardsCount': game.start_dealt_cards_count,
-            'currentPlayer': game.current_player,
-            'hasWinner': game.winner is not None,
-            'lastPlayedTime': game.last_played_time,
-            'playerNames': game.player_names,
-            'gameStarted': game.game_started
-        })
+    for _, game in game_states.items():
+        active_games.append(game.to_dict())
     
     # Sort by last played time (newest first) and limit to 100
     active_games.sort(key=lambda g: g['lastPlayedTime'], reverse=True)
@@ -334,21 +311,7 @@ def get_game_state():
     
     game = game_states[game_id]
     
-    return jsonify({
-        'deck': game.deck,
-        'players': game.players,
-        'currentPlayer': game.current_player,
-        'tableCards': game.table_cards,
-        'cardPositions': game.card_positions,
-        'winner': game.winner,
-        'playerNames': game.player_names,
-        'joinedPlayers': game.joined_players,
-        'playerCount': game.player_count,
-        'startDealtCardsCount': game.start_dealt_cards_count,
-        'gameStarted': game.game_started,
-        'waitingForPlayers': game.joined_players < game.player_count and not game.game_started,
-        'isFinished': game.winner is not None
-    })
+    return jsonify(game.to_dict())
 
 if __name__ == '__main__':
     app.run(debug=True) 
