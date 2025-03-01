@@ -1,43 +1,65 @@
-import { useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
 import './WaitingPage.scss';
 
 function WaitingPage() {
   const { gameId } = useParams();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   
-  const playerCount = parseInt(searchParams.get('playerCount') || '4', 10);
-  const playerName = searchParams.get('playerName') || '';
-  const startDealtCardsCount = parseInt(searchParams.get('startDealtCardsCount') || '8', 10);
-
   const {
     error,
     playerNames,
     joinedPlayers,
     gameStarted,
+    playerCount,
     joinGame,
-    initializeGame,
+    getGameState,
   } = useRemoteGameEngine({
     gameId,
-    playerCount,
-    startDealtCardsCount,
-    playerName,
   });
 
   useEffect(() => {
-    if (playerName) {
-      initializeGame();
-    }
-  }, [playerName, initializeGame]);
+    const checkGame = async () => {
+      try {
+        setLoading(true);
+        // Get the current game state
+        await getGameState();
+        setLoading(false);
+      } catch (error) {
+        console.error("Error getting game state:", error);
+        setLoading(false);
+      }
+    };
+    
+    checkGame();
+  }, [getGameState]);
 
   useEffect(() => {
     if (gameStarted) {
       // Redirect to game page when the game starts
-      navigate(`/game/${gameId}?playerName=${playerName}&playerCount=${playerCount}&startDealtCardsCount=${startDealtCardsCount}`);
+      navigate(`/game/${gameId}`);
     }
-  }, [gameStarted, navigate, gameId, playerName, playerCount, startDealtCardsCount]);
+  }, [gameStarted, navigate, gameId]);
+
+  const handleJoinGame = async () => {
+    try {
+      await joinGame();
+    } catch (error) {
+      console.error("Error joining game:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="waiting-page">
+        <div className="waiting-container">
+          <h2>Loading game...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="waiting-page">
@@ -68,7 +90,7 @@ function WaitingPage() {
         {joinedPlayers < playerCount && (
           <button 
             className="join-button"
-            onClick={joinGame}
+            onClick={handleJoinGame}
           >
             Join Game
           </button>

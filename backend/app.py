@@ -319,5 +319,29 @@ def get_active_games():
     
     return jsonify({'games': active_games})
 
+@app.route('/api/game/state', methods=['GET'])
+def get_game_state():
+    game_id = request.args.get('gameId')
+    
+    if game_id not in game_states:
+        return jsonify({'error': 'Game not found'}), 404
+    
+    game = game_states[game_id]
+    
+    return jsonify({
+        'deck': game.deck,
+        'players': game.players,
+        'currentPlayer': game.current_player,
+        'tableCards': game.table_cards,
+        'cardPositions': game.card_positions,
+        'winner': game.winner,
+        'playerNames': game.player_names,
+        'joinedPlayers': game.joined_players,
+        'playerCount': game.player_count,
+        'gameStarted': game.game_started,
+        'waitingForPlayers': game.joined_players < game.player_count and not game.game_started,
+        'isFinished': game.winner is not None
+    })
+
 if __name__ == '__main__':
     app.run(debug=True) 

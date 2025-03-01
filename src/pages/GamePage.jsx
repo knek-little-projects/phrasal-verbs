@@ -50,10 +50,12 @@ function GamePage() {
     handlePlayCard,
     handleSkipTurn,
     initializeGame,
+    getGameState,
     restartGame,
     error,
     playerNames,
     gameStarted,
+    joinedPlayers,
   } = useRemoteGameEngine({
     gameId, 
     playerCount, 
@@ -61,12 +63,26 @@ function GamePage() {
     playerName,
   });
 
+  const [loading, setLoading] = useState(true);
+  const [gameError, setGameError] = useState(null);
+
   useEffect(() => {
-    // Initialize the game when the component mounts and player name is set
-    if (playerName) {
-      initializeGame();
-    }
-  }, [gameId, playerCount, startDealtCardsCount, playerName, initializeGame]);
+    // Get the game state when the component mounts and player name is set
+    const fetchGameState = async () => {
+      if (!playerName) return;
+      
+      try {
+        setLoading(true);
+        await getGameState();
+        setLoading(false);
+      } catch (error) {
+        setGameError("Game not found or could not be loaded.");
+        setLoading(false);
+      }
+    };
+    
+    fetchGameState();
+  }, [gameId, playerName, getGameState]);
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
@@ -119,8 +135,26 @@ function GamePage() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="game-page loading-container">
+        <h2>Loading game...</h2>
+      </div>
+    );
+  }
+
+  if (gameError) {
+    return (
+      <div className="game-page error-container">
+        <h2>Error</h2>
+        <p>{gameError}</p>
+        <button onClick={handleBackToHome}>Back to Home</button>
+      </div>
+    );
+  }
+
   // Redirect to waiting page if game hasn't started
-  if (!gameStarted) {
+  if (!gameStarted && joinedPlayers < playerCount) {
     navigate(`/waiting/${gameId}?playerName=${playerName}&playerCount=${playerCount}&startDealtCardsCount=${startDealtCardsCount}`);
     return null;
   }

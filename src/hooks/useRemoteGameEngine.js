@@ -320,6 +320,43 @@ export function useRemoteGameEngine({
     }
   };
 
+  const getGameState = useCallback(async () => {
+    try {
+      setError(null);
+      const response = await fetch(`${API_BASE_URL}/game/state?gameId=${gameId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get game state');
+      }
+      
+      const data = await response.json();
+      
+      setDeck(data.deck || []);
+      setPlayers(data.players || []);
+      setCurrentPlayer(data.currentPlayer || 0);
+      setTableCards(data.tableCards || []);
+      setCardPositions(data.cardPositions || []);
+      setWinner(data.winner);
+      setPlayerNames(data.playerNames || []);
+      setJoinedPlayers(data.joinedPlayers || 0);
+      setGameStarted(data.gameStarted || false);
+      
+      // Start polling if the game hasn't started yet
+      if (data.waitingForPlayers) {
+        setIsPolling(true);
+      } else {
+        setIsPolling(false);
+      }
+      
+      return data;
+    } catch (error) {
+      setError('Unable to get game state. Please check your connection and try again.');
+      console.error('Failed to get game state:', error);
+      throw error;
+    }
+  }, [gameId]);
+
   return {
     deck,
     players,
@@ -334,6 +371,7 @@ export function useRemoteGameEngine({
     initializeGame,
     joinGame,
     restartGame,
+    getGameState,
     error,
     playerNames,
     joinedPlayers,

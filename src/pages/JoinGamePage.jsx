@@ -34,7 +34,7 @@ function JoinGamePage() {
     fetchActiveGames();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!gameId.trim()) {
@@ -42,7 +42,20 @@ function JoinGamePage() {
       return;
     }
     
-    navigate(`/game/${gameId}`);
+    try {
+      // Check if the game exists before navigating
+      const response = await fetch(`http://localhost:5000/api/game/status?gameId=${gameId}`);
+      const data = await response.json();
+      
+      if (!data.exists) {
+        setError('Game not found. Please check the game name and try again.');
+        return;
+      }
+      
+      navigate(`/game/${gameId}`);
+    } catch (error) {
+      setError('Unable to check game status. Please try again later.');
+    }
   };
 
   const handleJoinGame = (selectedGameId) => {
