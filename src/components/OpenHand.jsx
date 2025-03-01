@@ -9,11 +9,12 @@ function OpenHand({
   onSkipTurn, 
   isCardPlayable,
   showSkipOption,
+  playable,
 }) {
   const [selectedCardIndex, setSelectedCardIndex] = React.useState(null);
 
   const handleCardClick = (index) => {
-    if (selectedCardIndex === index && isCardPlayable(cards[index])) {
+    if (playable && selectedCardIndex === index && isCardPlayable(cards[index])) {
       // Second click on the same card - play it
       onPlayCard(index);
       setSelectedCardIndex(null);

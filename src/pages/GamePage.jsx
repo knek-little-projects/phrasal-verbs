@@ -6,12 +6,14 @@ import MovingCard from '../components/MovingCard';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
 import Loader from '../components/Loader';
 import './GamePage.scss';
+import useLogin from '../hooks/useLogin';
 
 export default function GamePage() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const gameboardRef = useRef(null);
-
+  const { playerName } = useLogin();
+  
   const {
     gameState,
     movingCard,
@@ -45,6 +47,11 @@ export default function GamePage() {
     winner,
     playerNames,
   } = gameState;
+
+  // Add the isMyTurn constant
+  const currentPlayerName = playerNames[currentPlayer]; // Assuming currentPlayer is an index
+  const isMyTurn = currentPlayerName === playerName; // Replace 0 with the index of the current user if needed
+  const thisPlayerIndex = playerNames.findIndex(name => name === playerName)
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
@@ -107,6 +114,8 @@ export default function GamePage() {
         onSkipTurn={onSkipTurn}
         deck={deck}
         playerNames={playerNames}
+        isMyTurn={isMyTurn}
+        thisPlayerIndex={thisPlayerIndex}
       />
       
       {winner !== null && (

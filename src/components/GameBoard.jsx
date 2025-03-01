@@ -10,11 +10,12 @@ export default function GameBoard({
   players, 
   currentPlayer, 
   tableCards, 
-  cardPositions, 
   onPlayCard,
   onSkipTurn,
   deck,
-  playerNames = []
+  playerNames = [],
+  thisPlayerIndex,
+  isMyTurn,
 }) {
   const showSkipOption = true;
 
@@ -27,12 +28,12 @@ export default function GameBoard({
   const getPlayerName = (index) => {
     return playerNames && playerNames.length > index 
       ? playerNames[index] 
-      : `Player ${index + 1}`;
+      : `???`;
   };
 
   return (
     <div className="game-board">
-      <OpponentList players={players} currentPlayer={currentPlayer} />
+      <OpponentList players={players} playerNames={playerNames} excludePlayerIndex={thisPlayerIndex} />
 
       <div className="table">
         {deck.length > 0 && <Deck count={deck.length} />}
@@ -40,14 +41,15 @@ export default function GameBoard({
         <CardHeap tableCards={tableCards} cardPositions={randomizedCardPositions} />
       </div>
 
-      <div className="player-name">{getPlayerName(currentPlayer)}</div>
+      <div className="player-name">{getPlayerName(thisPlayerIndex)}</div>
 
-      <OpenHand 
-        cards={players[currentPlayer]?.cards || []}
+      <OpenHand
+        cards={players[thisPlayerIndex]?.cards || []}
         onPlayCard={onPlayCard}
         onSkipTurn={onSkipTurn}
         isCardPlayable={isCardPlayable}
         showSkipOption={showSkipOption}
+        playable={isMyTurn}
       />
     </div>
   );
