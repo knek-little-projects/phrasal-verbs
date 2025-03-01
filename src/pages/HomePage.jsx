@@ -2,23 +2,19 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PlayerNameForm from '../components/PlayerNameForm';
 import './HomePage.scss';
+import useLogin from '../hooks/useLogin'
 
 function HomePage() {
-  const [playerName, setPlayerName] = useState('');
+  const { playerName, setPlayerName } = useLogin()
   const [showNameForm, setShowNameForm] = useState(false);
 
   useEffect(() => {
-    // Check if player name exists in localStorage
-    const storedName = localStorage.getItem('playerName');
-    if (storedName) {
-      setPlayerName(storedName);
-    } else {
+    if (!playerName) {
       setShowNameForm(true);
     }
   }, []);
 
   const handleNameSubmit = (name) => {
-    localStorage.setItem('playerName', name);
     setPlayerName(name);
     setShowNameForm(false);
   };
@@ -39,7 +35,7 @@ function HomePage() {
         <Link to="/new" className="button">New Game</Link>
         <Link to="/join" className="button">Join Game</Link>
       </div>
-      <button 
+      <button
         className="change-name-button"
         onClick={() => setShowNameForm(true)}
       >
