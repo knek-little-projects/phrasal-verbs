@@ -5,8 +5,6 @@ const API_BASE_URL = 'http://localhost:5000/api';
 export function useRemoteGameEngine({
   gameId, 
   playerName,
-  playerCount = 4, 
-  startDealtCardsCount = 8,
   timeout = 1000,
 }) {
   if (!playerName) {
@@ -25,8 +23,10 @@ export function useRemoteGameEngine({
   const [joinedPlayers, setJoinedPlayers] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
+  const [playerCount, setPlayerCount] = useState(0);
+  const [startDealtCardsCount, setStartDealtCardsCount] = useState(0);
 
-  const initializeGame = useCallback(async () => {
+  const initializeGame = useCallback(async (playerCount, startDealtCardsCount) => {
     try {
       setError(null);
       const response = await fetch(`${API_BASE_URL}/game/initialize`, {
@@ -57,6 +57,8 @@ export function useRemoteGameEngine({
       setPlayerNames(data.playerNames || []);
       setJoinedPlayers(data.joinedPlayers || 0);
       setGameStarted(data.gameStarted || false);
+      setPlayerCount(data.playerCount);
+      setStartDealtCardsCount(data.startDealtCardsCount);
       
       // Start polling if the game hasn't started yet
       if (!data.gameStarted && data.joinedPlayers < data.playerCount) {
@@ -68,7 +70,7 @@ export function useRemoteGameEngine({
       setError('Unable to connect to game server. Please check your connection and try again.');
       console.error('Failed to initialize game:', error);
     }
-  }, [gameId, playerCount, startDealtCardsCount, playerName]);
+  }, [gameId, playerName]);
 
   const joinGame = async () => {
     try {
@@ -133,7 +135,7 @@ export function useRemoteGameEngine({
         
         // If the game has started, fetch the full game state
         if (data.started && !gameStarted) {
-          await initializeGame();
+          await initializeGame(data.playerCount, data.startDealtCardsCount);
         }
         
         // Stop polling if the game has started
@@ -169,9 +171,9 @@ export function useRemoteGameEngine({
   useEffect(() => {
     // Initialize the game when the component mounts
     if (gameId && playerName) {
-      initializeGame();
+      initializeGame(playerCount, startDealtCardsCount);
     }
-  }, [gameId, playerName, initializeGame]);
+  }, [gameId, playerName, initializeGame, playerCount, startDealtCardsCount]);
 
   const getRandomShift = () => {
     const getRandomShiftValue = () => {
@@ -338,13 +340,28 @@ export function useRemoteGameEngine({
       
       setDeck(data.deck || []);
       setPlayers(data.players || []);
-      setCurrentPlayer(data.currentPlayer || 0);
+
+      setCurrentPlayer(data.currentPlayer)
+      if (data.currentPlayer == null) {
+        throw new Error('[server error] Current player is null');
+      }
+
       setTableCards(data.tableCards || []);
       setCardPositions(data.cardPositions || []);
       setWinner(data.winner);
       setPlayerNames(data.playerNames || []);
       setJoinedPlayers(data.joinedPlayers || 0);
       setGameStarted(data.gameStarted || false);
+      
+      setPlayerCount(data.playerCount);
+      if (data.playerCount == null) {
+        throw new Error('[server error] Player count is null');
+      }
+
+      setStartDealtCardsCount(data.startDealtCardsCount);
+      if (data.startDealtCardsCount == null) {
+        throw new Error('[server error] Start dealt cards count is null');
+      }
       
       // Start polling if the game hasn't started yet
       if (data.waitingForPlayers) {
@@ -380,6 +397,7 @@ export function useRemoteGameEngine({
     playerNames,
     joinedPlayers,
     playerCount,
+    startDealtCardsCount,
     gameStarted,
   };
 } 

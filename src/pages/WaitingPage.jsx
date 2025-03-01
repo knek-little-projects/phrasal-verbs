@@ -62,6 +62,15 @@ export default function WaitingPage() {
     }
   }, [gameStarted, navigate, gameId]);
 
+  // Check for invalid state before rendering
+  if (playerCount == null || joinedPlayers == null) {
+    throw new Error(`Invalid state: playerCount (${playerCount}) or joinedPlayers (${joinedPlayers}) is null or undefined.`);
+  }
+
+  if (playerCount < joinedPlayers) {
+    throw new Error(`Invalid state: playerCount (${playerCount}) is less than joinedPlayers (${joinedPlayers}).`);
+  }
+
   return (
     <div className="waiting-page">
       <div className="waiting-container">

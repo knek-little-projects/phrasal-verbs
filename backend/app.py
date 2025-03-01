@@ -11,7 +11,10 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 VERBS_FILE = os.path.join(os.path.dirname(__file__), '../src/constants/verbs.json')
 
 class GameState:
-    def __init__(self, player_count=4, start_dealt_cards_count=8):
+    def __init__(self, player_count, start_dealt_cards_count):
+        assert player_count > 1, 'Player count must be greater than 0'
+        assert start_dealt_cards_count > 0, 'Start dealt cards count must be greater than 0'
+
         self.player_count = player_count
         self.start_dealt_cards_count = start_dealt_cards_count
         self.deck = []
@@ -21,7 +24,7 @@ class GameState:
         self.card_positions = []
         self.winner = None
         self.last_played_time = datetime.datetime.now().isoformat()
-        self.player_names = ["Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6"][:player_count]
+        self.player_names = []
         self.joined_players = 0  # Track how many players have joined
         self.game_started = False  # Track if the game has started
         
@@ -108,31 +111,32 @@ game_states = {}
 @app.route('/api/game/initialize', methods=['POST'])
 def initialize_game():
     data = request.json
+
     game_id = data.get('gameId')
-    player_count = data.get('playerCount', 4)
-    start_dealt_cards = data.get('startDealtCardsCount', 8)
-    player_name = data.get('playerName', 'Player 1')
-
-    if not player_name:
-        return jsonify({'error': 'Player name is required.'}), 400
-
     if game_id in game_states:
         return jsonify({'error': 'Game already exists.'}), 400
+
+    player_count = data.get('playerCount')
+    if not player_count:
+        return jsonify({'error': 'Player count is required.'}), 400
+
+    start_dealt_cards = data.get('startDealtCardsCount')
+    if not start_dealt_cards:
+        return jsonify({'error': 'Start dealt cards count is required.'}), 400
+
+    player_name = data.get('playerName')
+    if not player_name:
+        return jsonify({'error': 'Player name is required.'}), 400
 
     # Initialize a new game if it doesn't exist
     game_states[game_id] = GameState(player_count, start_dealt_cards)
     game = game_states[game_id]
     
     # Set the first player's name if provided
-    game.player_names[0] = player_name
+    game.player_names.append(player_name)
     
     # Mark the first player as joined
     game.joined_players = 1
-    
-    # If only one player is needed, start the game immediately
-    if game.player_count == 1:
-        game.initialize_game()
-        game.game_started = True
     
     return jsonify({
         'deck': game.deck,
@@ -144,6 +148,7 @@ def initialize_game():
         'playerNames': game.player_names,
         'joinedPlayers': game.joined_players,
         'playerCount': game.player_count,
+        'startDealtCardsCount': game.start_dealt_cards_count,
         'gameStarted': game.game_started
     })
 
@@ -292,6 +297,7 @@ def restart_game():
             'playerNames': game.player_names,
             'joinedPlayers': game.joined_players,
             'playerCount': game.player_count,
+            'startDealtCardsCount': game.start_dealt_cards_count,
             'gameStarted': game.game_started
         })
     else:
@@ -338,6 +344,7 @@ def get_game_state():
         'playerNames': game.player_names,
         'joinedPlayers': game.joined_players,
         'playerCount': game.player_count,
+        'startDealtCardsCount': game.start_dealt_cards_count,
         'gameStarted': game.game_started,
         'waitingForPlayers': game.joined_players < game.player_count and not game.game_started,
         'isFinished': game.winner is not None
