@@ -184,5 +184,40 @@ def check_game_status():
     else:
         return jsonify({'started': False}), 404
 
+@app.route('/api/game/restart', methods=['POST'])
+def restart_game():
+    data = request.json
+    game_id = data.get('gameId')
+    
+    if game_id in game_states:
+        player_count = len(game_states[game_id].players)
+        start_dealt_cards = game_states[game_id].start_dealt_cards_count
+        game_states[game_id] = GameState(player_count, start_dealt_cards)
+        
+        return jsonify({
+            'deck': game_states[game_id].deck,
+            'players': game_states[game_id].players,
+            'currentPlayer': game_states[game_id].current_player,
+            'tableCards': game_states[game_id].table_cards,
+            'cardPositions': game_states[game_id].card_positions,
+            'winner': game_states[game_id].winner
+        })
+    else:
+        return jsonify({'error': 'Game not found'}), 404
+
+@app.route('/api/game/active', methods=['GET'])
+def get_active_games():
+    active_games = []
+    for game_id, game in game_states.items():
+        active_games.append({
+            'id': game_id,
+            'playerCount': game.player_count,
+            'startDealtCardsCount': game.start_dealt_cards_count,
+            'currentPlayer': game.current_player,
+            'hasWinner': game.winner is not None
+        })
+    
+    return jsonify({'games': active_games})
+
 if __name__ == '__main__':
     app.run(debug=True) 

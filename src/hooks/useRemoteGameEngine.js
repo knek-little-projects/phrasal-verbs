@@ -183,6 +183,35 @@ export function useRemoteGameEngine(
     }
   };
 
+  const restartGame = async () => {
+    try {
+      setError(null);
+      const response = await fetch(`${API_BASE_URL}/game/restart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ gameId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to restart game');
+      }
+
+      const data = await response.json();
+      setDeck(data.deck);
+      setPlayers(data.players);
+      setCurrentPlayer(data.currentPlayer);
+      setTableCards(data.tableCards);
+      setCardPositions(data.cardPositions);
+      setWinner(data.winner);
+    } catch (error) {
+      setError('Failed to restart game. Please check your connection and try again.');
+      console.error('Failed to restart game:', error);
+    }
+  };
+
   return {
     deck,
     players,
@@ -194,7 +223,8 @@ export function useRemoteGameEngine(
     setMovingCard,
     handlePlayCard,
     handleSkipTurn,
-    error,
     initializeGame,
+    restartGame,
+    error,
   };
 } 
