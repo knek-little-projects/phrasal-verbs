@@ -72,19 +72,6 @@ export function useRemoteGameEngine({
     };
   }, [updateGameState]);
 
-  // const initializeGame = useCallback(async (playerCount, startDealtCardsCount) => {
-  //   try {
-  //     setError(null);
-  //     const data = await api.initializeGame(gameId, playerCount, startDealtCardsCount, playerName);
-  //     await updateGameState(); // Use updateGameState to ensure consistent state
-  //     return data;
-  //   } catch (error) {
-  //     setError('Unable to connect to game server. Please check your connection and try again.');
-  //     console.error('Failed to initialize game:', error);
-  //     throw error;
-  //   }
-  // }, [gameId, playerName, updateGameState]);
-
   const joinGame = useCallback(async () => {
     try {
       setError(null);
@@ -191,7 +178,6 @@ export function useRemoteGameEngine({
     gameState,
     movingCard,
     error,
-    // initializeGame,
     joinGame,
     restartGame,
     handlePlayCard,
