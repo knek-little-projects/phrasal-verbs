@@ -14,7 +14,6 @@ function GamePage() {
   const gameboardRef = useRef(null);
   const [showNameForm, setShowNameForm] = useState(false);
   const [playerName, setPlayerName] = useState('');
-  const [isJoining, setIsJoining] = useState(false);
   
   // Get parameters from URL or use defaults
   const playerCount = parseInt(searchParams.get('playerCount') || '4', 10);
@@ -51,11 +50,9 @@ function GamePage() {
     handlePlayCard,
     handleSkipTurn,
     initializeGame,
-    joinGame,
     restartGame,
     error,
     playerNames,
-    joinedPlayers,
     gameStarted,
   } = useRemoteGameEngine({
     gameId, 
@@ -70,17 +67,6 @@ function GamePage() {
       initializeGame();
     }
   }, [gameId, playerCount, startDealtCardsCount, playerName, initializeGame]);
-
-  const handleJoinGame = async () => {
-    try {
-      setIsJoining(true);
-      await joinGame();
-    } catch (error) {
-      console.error('Failed to join game:', error);
-    } finally {
-      setIsJoining(false);
-    }
-  };
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
