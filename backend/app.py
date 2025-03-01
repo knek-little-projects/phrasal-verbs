@@ -176,7 +176,7 @@ def join_game():
     if player_name not in game.player_names[:game.joined_players]:
         
         # Update player name if provided
-        game.player_names[game.joined_players] = player_name
+        game.player_names.append(player_name)
         
         # Increment joined players count
         game.joined_players += 1
