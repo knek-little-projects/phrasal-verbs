@@ -133,50 +133,10 @@ function GamePage() {
     );
   }
 
-  // Show waiting screen if the game hasn't started yet
+  // Redirect to waiting page if game hasn't started
   if (!gameStarted) {
-    return (
-      <div className="game-page waiting-screen">
-        <div className="waiting-container">
-          <h2>Game: {gameId}</h2>
-          <p className="waiting-message">
-            Waiting for players to join ({joinedPlayers}/{playerCount})
-          </p>
-          
-          <div className="player-list">
-            <h3>Players:</h3>
-            <ul>
-              {playerNames.slice(0, joinedPlayers).map((name, index) => (
-                <li key={index} className="player-item">
-                  {name}
-                </li>
-              ))}
-              {Array(playerCount - joinedPlayers).fill().map((_, index) => (
-                <li key={`empty-${index}`} className="player-item empty">
-                  Waiting for player...
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          {error && <div className="error-message">{error}</div>}
-          
-          {!isJoining && joinedPlayers < playerCount && (
-            <button 
-              className="join-button"
-              onClick={handleJoinGame}
-              disabled={isJoining}
-            >
-              Join Game
-            </button>
-          )}
-          
-          <button className="back-button" onClick={() => navigate('/')}>
-            Back to Home
-          </button>
-        </div>
-      </div>
-    );
+    navigate(`/waiting/${gameId}?playerName=${playerName}&playerCount=${playerCount}&startDealtCardsCount=${startDealtCardsCount}`);
+    return null;
   }
 
   return (

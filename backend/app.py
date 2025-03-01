@@ -112,45 +112,19 @@ def initialize_game():
     player_count = data.get('playerCount', 4)
     start_dealt_cards = data.get('startDealtCardsCount', 8)
     player_name = data.get('playerName', 'Player 1')
-    
-    # Check if the game already exists
+
+    if not player_name:
+        return jsonify({'error': 'Player name is required.'}), 400
+
     if game_id in game_states:
-        game = game_states[game_id]
-        game.last_played_time = datetime.datetime.now().isoformat()
-        
-        # If the game hasn't started yet, add the player
-        if not game.game_started and game.joined_players < game.player_count:
-            # Update player name if provided
-            if player_name and player_name != 'Player 1':
-                game.player_names[game.joined_players] = player_name
-            
-            # Increment joined players count
-            game.joined_players += 1
-            
-            # If all players have joined, initialize the game
-            if game.joined_players == game.player_count:
-                game.initialize_game()
-        
-        return jsonify({
-            'deck': game.deck,
-            'players': game.players,
-            'currentPlayer': game.current_player,
-            'tableCards': game.table_cards,
-            'cardPositions': game.card_positions,
-            'winner': game.winner,
-            'playerNames': game.player_names,
-            'joinedPlayers': game.joined_players,
-            'playerCount': game.player_count,
-            'gameStarted': game.game_started
-        })
-    
+        return jsonify({'error': 'Game already exists.'}), 400
+
     # Initialize a new game if it doesn't exist
     game_states[game_id] = GameState(player_count, start_dealt_cards)
     game = game_states[game_id]
     
     # Set the first player's name if provided
-    if player_name and player_name != 'Player 1':
-        game.player_names[0] = player_name
+    game.player_names[0] = player_name
     
     # Mark the first player as joined
     game.joined_players = 1
@@ -158,6 +132,7 @@ def initialize_game():
     # If only one player is needed, start the game immediately
     if game.player_count == 1:
         game.initialize_game()
+        game.game_started = True
     
     return jsonify({
         'deck': game.deck,
@@ -178,6 +153,9 @@ def join_game():
     game_id = data.get('gameId')
     player_name = data.get('playerName', '')
     
+    if not player_name:
+        return jsonify({'error': 'Player name is required.'}), 400
+
     if game_id not in game_states:
         return jsonify({'error': 'Game not found'}), 404
     
@@ -188,20 +166,20 @@ def join_game():
     if game.joined_players >= game.player_count:
         return jsonify({'error': 'Game is full'}), 400
     
-    # Check if the game has already started
-    if game.game_started:
-        return jsonify({'error': 'Game has already started'}), 400
-    
-    # Update player name if provided
-    if player_name and player_name != 'Player 1':
+
+    # Allow the player to join again without reinitializing the game
+    if player_name not in game.player_names[:game.joined_players]:
+        
+        # Update player name if provided
         game.player_names[game.joined_players] = player_name
-    
-    # Increment joined players count
-    game.joined_players += 1
-    
-    # If all players have joined, initialize the game
-    if game.joined_players == game.player_count:
-        game.initialize_game()
+        
+        # Increment joined players count
+        game.joined_players += 1
+        
+        if game.joined_players == game.player_count:
+            game.initialize_game()
+            game.game_started = True
+
     
     return jsonify({
         'deck': game.deck,
@@ -291,15 +269,30 @@ def restart_game():
     if game_id in game_states:
         player_count = len(game_states[game_id].players)
         start_dealt_cards = game_states[game_id].start_dealt_cards_count
+        player_names = game_states[game_id].player_names  # Save player names
+        
+        # Create a new game state with the same settings
         game_states[game_id] = GameState(player_count, start_dealt_cards)
+        game = game_states[game_id]
+        
+        # Restore player names
+        game.player_names = player_names
+        game.joined_players = player_count
+        
+        # Initialize the game since all players are already joined
+        game.initialize_game()
         
         return jsonify({
-            'deck': game_states[game_id].deck,
-            'players': game_states[game_id].players,
-            'currentPlayer': game_states[game_id].current_player,
-            'tableCards': game_states[game_id].table_cards,
-            'cardPositions': game_states[game_id].card_positions,
-            'winner': game_states[game_id].winner
+            'deck': game.deck,
+            'players': game.players,
+            'currentPlayer': game.current_player,
+            'tableCards': game.table_cards,
+            'cardPositions': game.card_positions,
+            'winner': game.winner,
+            'playerNames': game.player_names,
+            'joinedPlayers': game.joined_players,
+            'playerCount': game.player_count,
+            'gameStarted': game.game_started
         })
     else:
         return jsonify({'error': 'Game not found'}), 404
