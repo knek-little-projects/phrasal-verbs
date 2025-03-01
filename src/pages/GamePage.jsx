@@ -3,7 +3,6 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import GameBoard from '../components/GameBoard';
 import WinnerOverlay from '../components/WinnerOverlay';
 import MovingCard from '../components/MovingCard';
-import PlayerNameForm from '../components/PlayerNameForm';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
 import './GamePage.scss';
 
@@ -31,6 +30,13 @@ function GamePage() {
     winner,
     playerNames,
   } = gameState;
+
+  // Update effect to check joined players against player count
+  useEffect(() => {
+    if (gameState.joinedPlayers < gameState.playerCount) {
+      navigate(`/waiting/${gameId}`);
+    }
+  }, [gameState.joinedPlayers, gameState.playerCount, gameId, navigate]);
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
