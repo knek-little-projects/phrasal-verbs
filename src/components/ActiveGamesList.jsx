@@ -46,7 +46,7 @@ const ActiveGamesList = ({ activeGames, loading, handleJoinGame }) => {
                   {getPlayerNamesString(game.playerNames, game.joinedPlayers)}
                 </span>
                 <span className="game-status">
-                  {game.gameStarted ? 'In progress' : `Waiting (${game.joinedPlayers}/${game.playerCount})`}
+                  {game.gameStarted ? `` : `Waiting (${game.joinedPlayers}/${game.playerCount})`}
                 </span>
                 <span className="last-played">
                   Last activity: {formatTime(game.lastPlayedTime)}
@@ -55,7 +55,6 @@ const ActiveGamesList = ({ activeGames, loading, handleJoinGame }) => {
               <button 
                 className="join-button"
                 onClick={() => handleJoinGame(game.id)}
-                disabled={game.gameStarted && game.joinedPlayers >= game.playerCount}
               >
                 {game.gameStarted ? 'Spectate' : 'Join'}
               </button>
