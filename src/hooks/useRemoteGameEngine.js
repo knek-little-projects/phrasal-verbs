@@ -14,7 +14,7 @@ export function useRemoteGameEngine({
     throw new Error('playerName is required');
   }
 
-  const [gameState, setGameState] = useState(new GameState());
+  const [gameState, setGameState] = useState(null);
   const [movingCard, setMovingCard] = useState(null);
   const [error, setError] = useState(null);
 

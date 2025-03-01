@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ActiveGamesList from '../components/ActiveGamesList';
 import { fetchActiveGames, fetchGameStatus } from '../api';
 import './JoinGamePage.scss';
+import Loader from '../components/Loader';
 
 function JoinGamePage() {
   const [gameId, setGameId] = useState('');

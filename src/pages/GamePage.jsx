@@ -4,9 +4,10 @@ import GameBoard from '../components/GameBoard';
 import WinnerOverlay from '../components/WinnerOverlay';
 import MovingCard from '../components/MovingCard';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
+import Loader from '../components/Loader';
 import './GamePage.scss';
 
-function GamePage() {
+export default function GamePage() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const gameboardRef = useRef(null);
@@ -20,6 +21,20 @@ function GamePage() {
     restartGame,
   } = useRemoteGameEngine({ gameId });
 
+  useEffect(() => {
+    if (gameState && gameState.joinedPlayers < gameState.playerCount) {
+      navigate(`/waiting/${gameId}`);
+    }
+  }, [gameState, gameId, navigate]);
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!gameState) {
+    return <Loader />;
+  }
+
   // Update references from individual state variables to gameState properties
   const {
     deck,
@@ -30,13 +45,6 @@ function GamePage() {
     winner,
     playerNames,
   } = gameState;
-
-  // Update effect to check joined players against player count
-  useEffect(() => {
-    if (gameState.joinedPlayers < gameState.playerCount) {
-      navigate(`/waiting/${gameId}`);
-    }
-  }, [gameState.joinedPlayers, gameState.playerCount, gameId, navigate]);
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
@@ -90,12 +98,6 @@ function GamePage() {
         </button>
       </div>
       
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
-      
       <GameBoard
         players={players}
         currentPlayer={currentPlayer}
@@ -126,6 +128,4 @@ function GamePage() {
       )}
     </div>
   );
-}
-
-export default GamePage; 
+} 

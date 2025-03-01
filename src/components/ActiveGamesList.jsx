@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import Loader from '../components/Loader';
 
 const ActiveGamesList = ({ activeGames, loading, handleJoinGame }) => {
   const formatTime = (isoString) => {
@@ -24,6 +25,10 @@ const ActiveGamesList = ({ activeGames, loading, handleJoinGame }) => {
     
     return `${customNames[0]}, ${customNames[1]}, +${customNames.length - 2} more`;
   };
+
+  if (!activeGames) {
+    return <Loader />;
+  }
 
   return (
     <div className="active-games">

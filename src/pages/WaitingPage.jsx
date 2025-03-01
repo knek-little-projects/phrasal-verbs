@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
 import './WaitingPage.scss';
+import Loader from '../components/Loader';
 
 export default function WaitingPage() {
   const { gameId } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [joinError, setJoinError] = useState(null);
   const [hasJoined, setHasJoined] = useState(false);
   
@@ -17,13 +17,6 @@ export default function WaitingPage() {
   } = useRemoteGameEngine({
     gameId,
   });
-
-  const {
-    playerNames,
-    joinedPlayers,
-    playerCount,
-    gameStarted,
-  } = gameState;
 
   useEffect(() => {
     const attemptJoinGame = async () => {
@@ -44,11 +37,24 @@ export default function WaitingPage() {
   }, [gameId, hasJoined]);
 
   useEffect(() => {
-    if (gameStarted) {
+    if (gameState && gameState.gameStarted) {
       console.log(`Game has started. Redirecting to game page: ${gameId}`);
       navigate(`/game/${gameId}`);
     }
-  }, [gameStarted, navigate, gameId]);
+  }, [gameState, navigate, gameId]);
+
+  // Check for null gameState before rendering
+  if (gameState == null) {
+    return <Loader />;
+  }
+
+  // Destructure gameState after confirming it's not null
+  const {
+    playerNames,
+    joinedPlayers,
+    playerCount,
+    gameStarted,
+  } = gameState;
 
   // Check for invalid state before rendering
   if (playerCount == null || joinedPlayers == null) {
