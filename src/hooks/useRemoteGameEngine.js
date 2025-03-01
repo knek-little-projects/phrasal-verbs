@@ -1,152 +1,109 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as api from '../api'; // Import all API functions from the index.js file
+import GameState from './GameState'; // Import the GameState class
 
 const API_BASE_URL = 'http://localhost:5000/api';
+const POLL_INTERVAL = 2000; // Poll every 2 seconds
 
 export function useRemoteGameEngine({
   gameId, 
-  playerName,
   timeout = 1000,
 }) {
+  const playerName = localStorage.getItem('playerName');
   if (!playerName) {
     throw new Error('playerName is required');
   }
 
-  const [deck, setDeck] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [currentPlayer, setCurrentPlayer] = useState(0);
-  const [tableCards, setTableCards] = useState([]);
-  const [cardPositions, setCardPositions] = useState([]);
-  const [winner, setWinner] = useState(null);
+  const [gameState, setGameState] = useState(new GameState());
   const [movingCard, setMovingCard] = useState(null);
   const [error, setError] = useState(null);
-  const [playerNames, setPlayerNames] = useState([]);
-  const [joinedPlayers, setJoinedPlayers] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [isPolling, setIsPolling] = useState(false);
-  const [playerCount, setPlayerCount] = useState(0);
-  const [startDealtCardsCount, setStartDealtCardsCount] = useState(0);
 
-  const initializeGame = useCallback(async (playerCount, startDealtCardsCount) => {
+  // Fetch and update the complete game state
+  const updateGameState = useCallback(async () => {
     try {
       setError(null);
-      const data = await api.initializeGame(gameId, playerCount, startDealtCardsCount, playerName);
+      const data = await api.getGameState(gameId);
       
-      setDeck(data.deck || []);
-      setPlayers(data.players || []);
-      setCurrentPlayer(data.currentPlayer || 0);
-      setTableCards(data.tableCards || []);
-      setCardPositions(data.cardPositions || []);
-      setWinner(data.winner);
-      setPlayerNames(data.playerNames || []);
-      setJoinedPlayers(data.joinedPlayers || 0);
-      setGameStarted(data.gameStarted || false);
-      setPlayerCount(data.playerCount);
-      setStartDealtCardsCount(data.startDealtCardsCount);
-      
-      // Start polling if the game hasn't started yet
-      setIsPolling(!data.gameStarted && data.joinedPlayers < data.playerCount);
-    } catch (error) {
-      setError('Unable to connect to game server. Please check your connection and try again.');
-      console.error('Failed to initialize game:', error);
-    }
-  }, [gameId, playerName]);
-
-  const joinGame = async () => {
-    try {
-      setError(null);
-      const data = await api.joinGame(gameId, playerName);
-      
-      setDeck(data.deck || []);
-      setPlayers(data.players || []);
-      setCurrentPlayer(data.currentPlayer || 0);
-      setTableCards(data.tableCards || []);
-      setCardPositions(data.cardPositions || []);
-      setWinner(data.winner);
-      setPlayerNames(data.playerNames || []);
-      setJoinedPlayers(data.joinedPlayers || 0);
-      setGameStarted(data.gameStarted || false);
-      
-      // Start polling if the game hasn't started yet
-      setIsPolling(!data.gameStarted && data.joinedPlayers < data.playerCount);
+      setGameState(prevState => ({
+        ...prevState,
+        deck: data.deck || [],
+        players: data.players || [],
+        currentPlayer: data.currentPlayer,
+        tableCards: data.tableCards || [],
+        cardPositions: data.cardPositions || [],
+        winner: data.winner,
+        playerNames: data.playerNames || [],
+        joinedPlayers: data.joinedPlayers || 0,
+        gameStarted: data.gameStarted || false,
+        playerCount: data.playerCount,
+        startDealtCardsCount: data.startDealtCardsCount,
+      }));
       
       return data;
     } catch (error) {
-      setError(error.message || 'Failed to join game. Please try again.');
-      console.error('Failed to join game:', error);
+      setError('Unable to get game state. Please check your connection and try again.');
+      console.error('Failed to get game state:', error);
       throw error;
     }
-  };
+  }, [gameId]);
 
-  const checkGameStatus = useCallback(async () => {
-    try {
-      const data = await api.checkGameStatus(gameId);
-      
-      if (data.exists) {
-        setJoinedPlayers(data.joinedPlayers || 0);
-        setGameStarted(data.started || false);
-        setPlayerNames(data.playerNames || []);
-        
-        // If the game has started, fetch the full game state
-        if (data.started && !gameStarted) {
-          await initializeGame(data.playerCount, data.startDealtCardsCount);
-        }
-        
-        // Stop polling if the game has started
-        if (data.started) {
-          setIsPolling(false);
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Failed to check game status:', error);
-      return null;
-    }
-  }, [gameId, gameStarted, initializeGame]);
-
-  // Set up polling for game status
+  // Set up continuous polling
   useEffect(() => {
     let intervalId;
     
-    if (isPolling) {
-      intervalId = setInterval(() => {
-        checkGameStatus();
-      }, 2000); // Poll every 2 seconds
-    }
+    const pollGameState = async () => {
+      try {
+        await updateGameState();
+      } catch (error) {
+        console.error('Error polling game state:', error);
+      }
+    };
+
+    // Initial fetch
+    pollGameState();
+    
+    // Set up interval
+    intervalId = setInterval(pollGameState, POLL_INTERVAL);
     
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [isPolling, checkGameStatus]);
+  }, [updateGameState]);
 
-  useEffect(() => {
-    // Initialize the game when the component mounts
-    if (gameId && playerName) {
-      initializeGame(playerCount, startDealtCardsCount);
+  // const initializeGame = useCallback(async (playerCount, startDealtCardsCount) => {
+  //   try {
+  //     setError(null);
+  //     const data = await api.initializeGame(gameId, playerCount, startDealtCardsCount, playerName);
+  //     await updateGameState(); // Use updateGameState to ensure consistent state
+  //     return data;
+  //   } catch (error) {
+  //     setError('Unable to connect to game server. Please check your connection and try again.');
+  //     console.error('Failed to initialize game:', error);
+  //     throw error;
+  //   }
+  // }, [gameId, playerName, updateGameState]);
+
+  const joinGame = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await api.joinGame(gameId, playerName);
+      await updateGameState(); // Use updateGameState to ensure consistent state
+      return data;
+    } catch (error) {
+      setError(error.message || 'Failed to join game. Please try again.');
+      console.error('Failed to join game:', error);
+      throw error;
     }
-  }, [gameId, playerName, initializeGame, playerCount, startDealtCardsCount]);
-
-  const getRandomShift = () => {
-    const getRandomShiftValue = () => {
-      const shift = Math.random() * (20 - 5) + 5;
-      return Math.random() > 0.5 ? shift : -shift;
-    };
-
-    return {
-      x: getRandomShiftValue(),
-      y: getRandomShiftValue()
-    };
-  };
+  }, [gameId, playerName, updateGameState]);
 
   const handlePlayCard = async (cardIndex, startPos, tablePos) => {
     try {
       setError(null);
       
       // Set up the animation
-      const card = players[currentPlayer].cards[cardIndex];
+      const card = gameState.players[gameState.currentPlayer].cards[cardIndex];
       const shift = getRandomShift();
       const rotation = Math.random() * 60 - 30;
       
@@ -161,14 +118,11 @@ export function useRemoteGameEngine({
       });
       
       // Send the request to the server
-      const data = await api.playCard(gameId, cardIndex);
+      await api.playCard(gameId, cardIndex);
       
-      // Update the game state after the animation completes
+      // Update will happen automatically via polling
+      // Just need to handle animation completion
       setTimeout(() => {
-        setPlayers(data.players);
-        setCurrentPlayer(data.currentPlayer);
-        setTableCards(data.tableCards);
-        setWinner(data.winner);
         setMovingCard(null);
       }, timeout);
     } catch (error) {
@@ -193,22 +147,15 @@ export function useRemoteGameEngine({
       }
       
       // Send the request to the server
-      const data = await api.skipTurn(gameId);
+      await api.skipTurn(gameId);
       
       if (deckPos && handPos) {
-        // Update the game state after the animation completes
+        // Clear animation after timeout
         setTimeout(() => {
-          setDeck(data.deck);
-          setPlayers(data.players);
-          setCurrentPlayer(data.currentPlayer);
           setMovingCard(null);
         }, timeout);
-      } else {
-        // Update immediately if no animation
-        setDeck(data.deck);
-        setPlayers(data.players);
-        setCurrentPlayer(data.currentPlayer);
       }
+      // State update will happen automatically via polling
     } catch (error) {
       setMovingCard(null);
       setError('Failed to skip turn. Please check your connection and try again.');
@@ -219,80 +166,35 @@ export function useRemoteGameEngine({
   const restartGame = async () => {
     try {
       setError(null);
-      const data = await api.restartGame(gameId, playerName);
-      setDeck(data.deck);
-      setPlayers(data.players);
-      setCurrentPlayer(data.currentPlayer);
-      setTableCards(data.tableCards);
-      setCardPositions(data.cardPositions);
-      setWinner(data.winner);
-      setPlayerNames(data.playerNames || []);
+      await api.restartGame(gameId, playerName);
+      await updateGameState(); // Use updateGameState to ensure consistent state
     } catch (error) {
       setError('Failed to restart game. Please check your connection and try again.');
       console.error('Failed to restart game:', error);
     }
   };
 
-  const getGameState = useCallback(async () => {
-    try {
-      setError(null);
-      const data = await api.getGameState(gameId);
-      
-      setDeck(data.deck || []);
-      setPlayers(data.players || []);
-      setCurrentPlayer(data.currentPlayer);
-      if (data.currentPlayer == null) {
-        throw new Error('[server error] Current player is null');
-      }
+  // Helper function for card animations
+  const getRandomShift = () => {
+    const getRandomShiftValue = () => {
+      const shift = Math.random() * (20 - 5) + 5;
+      return Math.random() > 0.5 ? shift : -shift;
+    };
 
-      setTableCards(data.tableCards || []);
-      setCardPositions(data.cardPositions || []);
-      setWinner(data.winner);
-      setPlayerNames(data.playerNames || []);
-      setJoinedPlayers(data.joinedPlayers || 0);
-      setGameStarted(data.gameStarted || false);
-      
-      setPlayerCount(data.playerCount);
-      if (data.playerCount == null) {
-        throw new Error('[server error] Player count is null');
-      }
-
-      setStartDealtCardsCount(data.startDealtCardsCount);
-      if (data.startDealtCardsCount == null) {
-        throw new Error('[server error] Start dealt cards count is null');
-      }
-      
-      // Start polling if the game hasn't started yet
-      setIsPolling(data.waitingForPlayers);
-      
-      return data;
-    } catch (error) {
-      setError('Unable to get game state. Please check your connection and try again.');
-      console.error('Failed to get game state:', error);
-      throw error;
-    }
-  }, [gameId]);
+    return {
+      x: getRandomShiftValue(),
+      y: getRandomShiftValue()
+    };
+  };
 
   return {
-    deck,
-    players,
-    currentPlayer,
-    tableCards,
-    cardPositions,
-    winner,
+    gameState,
     movingCard,
-    setMovingCard,
-    handlePlayCard,
-    handleSkipTurn,
-    initializeGame,
+    error,
+    // initializeGame,
     joinGame,
     restartGame,
-    getGameState,
-    error,
-    playerNames,
-    joinedPlayers,
-    playerCount,
-    startDealtCardsCount,
-    gameStarted,
+    handlePlayCard,
+    handleSkipTurn,
   };
 } 

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
-import { useInterval } from '../hooks/useInterval';
 import './WaitingPage.scss';
 
 export default function WaitingPage() {
@@ -12,17 +11,19 @@ export default function WaitingPage() {
   const [hasJoined, setHasJoined] = useState(false);
   
   const {
+    gameState,
     error,
-    playerNames,
-    joinedPlayers,
-    gameStarted,
-    playerCount,
     joinGame,
-    getGameState,
   } = useRemoteGameEngine({
     gameId,
-    playerName: localStorage.getItem('playerName'),
   });
+
+  const {
+    playerNames,
+    joinedPlayers,
+    playerCount,
+    gameStarted,
+  } = gameState;
 
   useEffect(() => {
     const attemptJoinGame = async () => {
@@ -40,20 +41,7 @@ export default function WaitingPage() {
     };
 
     attemptJoinGame();
-  }, [gameId, hasJoined, joinGame]);
-
-  useInterval(async () => {
-    console.log("Fetching game state...");
-    try {
-      setLoading(true);
-      await getGameState();
-      setLoading(false);
-      console.log("Game state fetched successfully.");
-    } catch (error) {
-      console.error("Error getting game state:", error);
-      setLoading(false);
-    }
-  }, 1000);
+  }, [gameId, hasJoined]);
 
   useEffect(() => {
     if (gameStarted) {

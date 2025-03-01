@@ -9,35 +9,19 @@ import './GamePage.scss';
 
 function GamePage() {
   const { gameId } = useParams();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const gameboardRef = useRef(null);
-  const [showNameForm, setShowNameForm] = useState(false);
-  const [playerName, setPlayerName] = useState('');
-  
-  // Get parameters from URL or use defaults
-  const playerCount = parseInt(searchParams.get('playerCount') || '4', 10);
-  const startDealtCardsCount = parseInt(searchParams.get('startDealtCardsCount') || '8', 10);
-  const urlPlayerName = searchParams.get('playerName') || '';
 
-  useEffect(() => {
-    // Check if player name exists in localStorage or URL
-    const storedName = localStorage.getItem('playerName');
-    if (urlPlayerName) {
-      setPlayerName(urlPlayerName);
-    } else if (storedName) {
-      setPlayerName(storedName);
-    } else {
-      setShowNameForm(true);
-    }
-  }, [urlPlayerName]);
+  const {
+    gameState,
+    movingCard,
+    error,
+    handlePlayCard,
+    handleSkipTurn,
+    restartGame,
+  } = useRemoteGameEngine({ gameId });
 
-  const handleNameSubmit = (name) => {
-    localStorage.setItem('playerName', name);
-    setPlayerName(name);
-    setShowNameForm(false);
-  };
-
+  // Update references from individual state variables to gameState properties
   const {
     deck,
     players,
@@ -45,44 +29,8 @@ function GamePage() {
     tableCards,
     cardPositions,
     winner,
-    movingCard,
-    setMovingCard,
-    handlePlayCard,
-    handleSkipTurn,
-    initializeGame,
-    getGameState,
-    restartGame,
-    error,
     playerNames,
-    gameStarted,
-    joinedPlayers,
-  } = useRemoteGameEngine({
-    gameId, 
-    playerCount, 
-    startDealtCardsCount,
-    playerName,
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [gameError, setGameError] = useState(null);
-
-  useEffect(() => {
-    // Get the game state when the component mounts and player name is set
-    const fetchGameState = async () => {
-      if (!playerName) return;
-      
-      try {
-        setLoading(true);
-        await getGameState();
-        setLoading(false);
-      } catch (error) {
-        setGameError("Game not found or could not be loaded.");
-        setLoading(false);
-      }
-    };
-    
-    fetchGameState();
-  }, [gameId, playerName, getGameState]);
+  } = gameState;
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
@@ -127,38 +75,6 @@ function GamePage() {
     navigate('/');
   };
 
-  if (showNameForm) {
-    return (
-      <div className="game-page name-form-container">
-        <PlayerNameForm onSubmit={handleNameSubmit} />
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="game-page loading-container">
-        <h2>Loading game...</h2>
-      </div>
-    );
-  }
-
-  if (gameError) {
-    return (
-      <div className="game-page error-container">
-        <h2>Error</h2>
-        <p>{gameError}</p>
-        <button onClick={handleBackToHome}>Back to Home</button>
-      </div>
-    );
-  }
-
-  // Redirect to waiting page if game hasn't started
-  if (!gameStarted && joinedPlayers < playerCount) {
-    navigate(`/waiting/${gameId}?playerName=${playerName}&playerCount=${playerCount}&startDealtCardsCount=${startDealtCardsCount}`);
-    return null;
-  }
-
   return (
     <div className="game-page" ref={gameboardRef}>
       <div className="game-header">
@@ -196,10 +112,9 @@ function GamePage() {
       
       {movingCard && (
         <MovingCard
-          startPosition={movingCard.startPos}
-          endPosition={movingCard.endPos}
-          onAnimationEnd={() => setMovingCard(null)}
           card={movingCard.card}
+          startPos={movingCard.startPos}
+          endPos={movingCard.endPos}
           rotation={movingCard.rotation}
         />
       )}

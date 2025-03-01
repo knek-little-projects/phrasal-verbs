@@ -7,18 +7,10 @@ function NewGamePage() {
   const [gameId, setGameId] = useState('My New Game');
   const [playerCount, setPlayerCount] = useState(2);
   const [startDealtCardsCount, setStartDealtCardsCount] = useState(3);
-  const [playerName, setPlayerName] = useState('');
   const [error, setError] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Get player name from localStorage
-    const storedName = localStorage.getItem('playerName');
-    if (storedName) {
-      setPlayerName(storedName);
-    }
-  }, []);
+  const playerName = localStorage.getItem('playerName');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,21 +19,18 @@ function NewGamePage() {
       setError('Please enter a game name');
       return;
     }
-
-    if (!playerName.trim()) {
-      setError('Please enter your name');
-      return;
-    }
-    
-    // Save player name to localStorage
-    localStorage.setItem('playerName', playerName);
     
     try {
       setIsCreating(true);
       setError('');
       
       // Call the initializeGame API to create the game
-      const response = await initializeGame(gameId, playerCount, startDealtCardsCount, playerName);
+      await initializeGame({
+        gameId, 
+        playerCount, 
+        startDealtCardsCount, 
+        playerName
+      });
       
       // Navigate to the waiting page after successful initialization
       navigate(`/waiting/${gameId}`);

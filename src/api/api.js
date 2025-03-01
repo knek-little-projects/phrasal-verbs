@@ -1,6 +1,11 @@
 const API_BASE_URL = 'http://localhost:5000/api';
 
-export const initializeGame = async (gameId, playerCount, startDealtCardsCount, playerName) => {
+export const initializeGame = async ({
+  gameId, 
+  playerCount, 
+  startDealtCardsCount, 
+  playerName
+}) => {
   
   console.log(`Initializing game with gameId: ${gameId}, playerCount: ${playerCount}, startDealtCardsCount: ${startDealtCardsCount}, playerName: ${playerName}`);
 
