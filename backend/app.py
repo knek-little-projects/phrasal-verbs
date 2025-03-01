@@ -66,6 +66,12 @@ class GameState:
         self.card_positions = []
         self.winner = None
 
+        # Check for winner after initialization
+        for player in self.players:
+            if len(player['cards']) == 0:
+                self.winner = player['id']
+                break
+
     def is_card_playable(self, card):
         if not self.table_cards:
             return True
@@ -168,6 +174,15 @@ def skip_turn():
         'players': game.players,
         'currentPlayer': game.current_player
     })
+
+@app.route('/api/game/status', methods=['GET'])
+def check_game_status():
+    game_id = request.args.get('gameId')
+    
+    if game_id in game_states:
+        return jsonify({'started': True}), 200
+    else:
+        return jsonify({'started': False}), 404
 
 if __name__ == '__main__':
     app.run(debug=True) 
