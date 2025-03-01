@@ -3,6 +3,7 @@ from flask_cors import CORS
 import random
 import json
 import os
+import datetime
 
 
 app = Flask(__name__)
@@ -19,6 +20,8 @@ class GameState:
         self.table_cards = []
         self.card_positions = []
         self.winner = None
+        self.last_played_time = datetime.datetime.now().isoformat()
+        self.player_names = ["Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6"][:player_count]
         
         # Load verbs data
         with open(VERBS_FILE) as f:
@@ -104,20 +107,37 @@ def initialize_game():
     game_id = data.get('gameId')
     player_count = data.get('playerCount', 4)
     start_dealt_cards = data.get('startDealtCardsCount', 8)
+    player_name = data.get('playerName', 'Player 1')
     
     # Check if the game already exists
     if game_id in game_states:
+        game = game_states[game_id]
+        game.last_played_time = datetime.datetime.now().isoformat()
+        
+        # Update player name if provided
+        if player_name and player_name != 'Player 1':
+            if player_name not in game.player_names:
+                for i in range(len(game.player_names)):
+                    if game.player_names[i].startswith('Player '):
+                        game.player_names[i] = player_name
+                        break
+        
         return jsonify({
-            'deck': game_states[game_id].deck,
-            'players': game_states[game_id].players,
-            'currentPlayer': game_states[game_id].current_player,
-            'tableCards': game_states[game_id].table_cards,
-            'cardPositions': game_states[game_id].card_positions,
-            'winner': game_states[game_id].winner
+            'deck': game.deck,
+            'players': game.players,
+            'currentPlayer': game.current_player,
+            'tableCards': game.table_cards,
+            'cardPositions': game.card_positions,
+            'winner': game.winner,
+            'playerNames': game.player_names
         })
     
     # Initialize a new game if it doesn't exist
     game_states[game_id] = GameState(player_count, start_dealt_cards)
+    
+    # Set the first player's name if provided
+    if player_name and player_name != 'Player 1':
+        game_states[game_id].player_names[0] = player_name
     
     return jsonify({
         'deck': game_states[game_id].deck,
@@ -125,7 +145,8 @@ def initialize_game():
         'currentPlayer': game_states[game_id].current_player,
         'tableCards': game_states[game_id].table_cards,
         'cardPositions': game_states[game_id].card_positions,
-        'winner': game_states[game_id].winner
+        'winner': game_states[game_id].winner,
+        'playerNames': game_states[game_id].player_names
     })
 
 @app.route('/api/game/play-card', methods=['POST'])
@@ -134,6 +155,8 @@ def play_card():
     game_id = data['gameId']
     card_index = data['cardIndex']
     game = game_states[game_id]
+    
+    game.last_played_time = datetime.datetime.now().isoformat()
     
     card = game.players[game.current_player]['cards'][card_index]
     
@@ -162,6 +185,8 @@ def skip_turn():
     data = request.json
     game_id = data['gameId']
     game = game_states[game_id]
+    
+    game.last_played_time = datetime.datetime.now().isoformat()
     
     if game.deck:
         new_card = game.deck.pop(0)
@@ -214,8 +239,14 @@ def get_active_games():
             'playerCount': game.player_count,
             'startDealtCardsCount': game.start_dealt_cards_count,
             'currentPlayer': game.current_player,
-            'hasWinner': game.winner is not None
+            'hasWinner': game.winner is not None,
+            'lastPlayedTime': game.last_played_time,
+            'playerNames': game.player_names
         })
+    
+    # Sort by last played time (newest first) and limit to 100
+    active_games.sort(key=lambda g: g['lastPlayedTime'], reverse=True)
+    active_games = active_games[:100]
     
     return jsonify({'games': active_games})
 

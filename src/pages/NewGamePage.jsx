@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NewGamePage.scss';
 
@@ -6,19 +6,28 @@ function NewGamePage() {
   const [gameId, setGameId] = useState('My New Game');
   const [playerCount, setPlayerCount] = useState(2);
   const [startDealtCardsCount, setStartDealtCardsCount] = useState(3);
+  const [playerName, setPlayerName] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Get player name from localStorage
+    const storedName = localStorage.getItem('playerName');
+    if (storedName) {
+      setPlayerName(storedName);
+    }
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    
     if (!gameId.trim()) {
       setError('Please enter a game name');
       return;
     }
-
+    
     // Navigate to the game page with the specified parameters
-    navigate(`/game/${gameId}?playerCount=${playerCount}&startDealtCardsCount=${startDealtCardsCount}`);
+    navigate(`/game/${gameId}?playerCount=${playerCount}&startDealtCardsCount=${startDealtCardsCount}&playerName=${encodeURIComponent(playerName)}`);
   };
 
   return (

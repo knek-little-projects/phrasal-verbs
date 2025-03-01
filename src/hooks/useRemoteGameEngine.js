@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -6,6 +6,7 @@ export function useRemoteGameEngine({
   gameId, 
   playerCount = 4, 
   startDealtCardsCount = 8,
+  playerName = '',
   timeout = 1000,
 }) {
   const [deck, setDeck] = useState([]);
@@ -16,8 +17,9 @@ export function useRemoteGameEngine({
   const [winner, setWinner] = useState(null);
   const [movingCard, setMovingCard] = useState(null);
   const [error, setError] = useState(null);
+  const [playerNames, setPlayerNames] = useState([]);
 
-  const initializeGame = async () => {
+  const initializeGame = useCallback(async () => {
     try {
       setError(null);
       const response = await fetch(`${API_BASE_URL}/game/initialize`, {
@@ -29,6 +31,7 @@ export function useRemoteGameEngine({
           gameId,
           playerCount,
           startDealtCardsCount,
+          playerName,
         }),
       });
       
@@ -44,15 +47,16 @@ export function useRemoteGameEngine({
       setTableCards(data.tableCards);
       setCardPositions(data.cardPositions);
       setWinner(data.winner);
+      setPlayerNames(data.playerNames || []);
     } catch (error) {
       setError('Unable to connect to game server. Please check your connection and try again.');
       console.error('Failed to initialize game:', error);
     }
-  };
+  }, [gameId, playerCount, startDealtCardsCount, playerName]);
 
   useEffect(() => {
     initializeGame();
-  }, []);
+  }, [initializeGame]);
 
   const getRandomShift = () => {
     const getRandomShiftValue = () => {
@@ -62,28 +66,30 @@ export function useRemoteGameEngine({
 
     return {
       x: getRandomShiftValue(),
-      y: getRandomShiftValue(),
-      rotation: Math.random() * 30 - 15
+      y: getRandomShiftValue()
     };
   };
 
   const handlePlayCard = async (cardIndex, startPos, tablePos) => {
     try {
       setError(null);
-      const shift = getRandomShift();
-      const endPos = {
-        x: tablePos.x + shift.x,
-        y: tablePos.y + shift.y
-      };
-
+      
+      // Set up the animation
       const card = players[currentPlayer].cards[cardIndex];
+      const shift = getRandomShift();
+      const rotation = Math.random() * 60 - 30;
+      
       setMovingCard({
-        startPos,
-        endPos,
         card,
-        rotation: shift.rotation
+        startPos,
+        endPos: {
+          x: tablePos.x + shift.x,
+          y: tablePos.y + shift.y
+        },
+        rotation
       });
-
+      
+      // Send the request to the server
       const response = await fetch(`${API_BASE_URL}/game/play-card`, {
         method: 'POST',
         headers: {
@@ -91,21 +97,22 @@ export function useRemoteGameEngine({
         },
         body: JSON.stringify({
           gameId,
-          cardIndex,
+          cardIndex
         }),
       });
-
-      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to play card');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to play card');
       }
       
+      const data = await response.json();
+      
+      // Update the game state after the animation completes
       setTimeout(() => {
         setPlayers(data.players);
         setCurrentPlayer(data.currentPlayer);
         setTableCards(data.tableCards);
-        setCardPositions(prev => [...prev, shift]);
         setWinner(data.winner);
         setMovingCard(null);
       }, timeout);
@@ -120,31 +127,36 @@ export function useRemoteGameEngine({
     try {
       setError(null);
       
-      if (deck.length > 0) {
-        const newCard = deck[0];
+      if (deckPos && handPos) {
+        // Set up the animation for drawing a card
         setMovingCard({
+          card: { phrasal_verb: '?', related_word: '?', category: 'unknown', color: '#ccc' },
           startPos: deckPos,
           endPos: handPos,
-          card: newCard,
-          faceDown: true
+          rotation: 0
         });
-
-        const response = await fetch(`${API_BASE_URL}/game/skip-turn`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            gameId,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error('Failed to skip turn');
-        }
-
+      }
+      
+      // Send the request to the server
+      const response = await fetch(`${API_BASE_URL}/game/skip-turn`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gameId
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to skip turn');
+      }
+      
+      const data = await response.json();
+      
+      if (deckPos && handPos) {
+        // Update the game state after the animation completes
         setTimeout(() => {
           setDeck(data.deck);
           setPlayers(data.players);
@@ -152,29 +164,10 @@ export function useRemoteGameEngine({
           setMovingCard(null);
         }, timeout);
       } else {
-        // Call the server directly when deck is empty
-        const response = await fetch(`${API_BASE_URL}/game/skip-turn`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            gameId,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error('Failed to skip turn');
-        }
-
-        setTimeout(() => {
-          setDeck(data.deck);
-          setPlayers(data.players);
-          setCurrentPlayer(data.currentPlayer);
-          setMovingCard(null);
-        }, timeout);
+        // Update immediately if no animation
+        setDeck(data.deck);
+        setPlayers(data.players);
+        setCurrentPlayer(data.currentPlayer);
       }
     } catch (error) {
       setMovingCard(null);
@@ -191,7 +184,10 @@ export function useRemoteGameEngine({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ gameId }),
+        body: JSON.stringify({ 
+          gameId,
+          playerName 
+        }),
       });
 
       if (!response.ok) {
@@ -206,6 +202,7 @@ export function useRemoteGameEngine({
       setTableCards(data.tableCards);
       setCardPositions(data.cardPositions);
       setWinner(data.winner);
+      setPlayerNames(data.playerNames || []);
     } catch (error) {
       setError('Failed to restart game. Please check your connection and try again.');
       console.error('Failed to restart game:', error);
@@ -226,5 +223,6 @@ export function useRemoteGameEngine({
     initializeGame,
     restartGame,
     error,
+    playerNames,
   };
 } 

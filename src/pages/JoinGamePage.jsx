@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
 import './JoinGamePage.scss';
 
 function JoinGamePage() {
@@ -47,6 +48,29 @@ function JoinGamePage() {
     navigate(`/game/${selectedGameId}`);
   };
 
+  const formatTime = (isoString) => {
+    try {
+      return formatDistanceToNow(new Date(isoString), { addSuffix: true });
+    } catch (error) {
+      return 'recently';
+    }
+  };
+
+  const getPlayerNamesString = (playerNames) => {
+    if (!playerNames || playerNames.length === 0) return 'No players';
+    
+    // Filter out default player names
+    const customNames = playerNames.filter(name => !name.match(/^Player \d+$/));
+    
+    if (customNames.length === 0) return `${playerNames.length} players`;
+    
+    if (customNames.length <= 2) {
+      return customNames.join(', ');
+    }
+    
+    return `${customNames[0]}, ${customNames[1]}, +${customNames.length - 2} more`;
+  };
+
   return (
     <div className="join-game-page">
       <h1>Join Game</h1>
@@ -84,7 +108,12 @@ function JoinGamePage() {
               <li key={game.id} className="game-item">
                 <div className="game-info">
                   <span className="game-name">{game.id}</span>
-                  <span className="player-count">Players: {game.playerCount}</span>
+                  <span className="player-count">
+                    {getPlayerNamesString(game.playerNames)}
+                  </span>
+                  <span className="last-played">
+                    Last activity: {formatTime(game.lastPlayedTime)}
+                  </span>
                 </div>
                 <button 
                   className="join-button"

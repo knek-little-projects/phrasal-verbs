@@ -1,8 +1,9 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import GameBoard from '../components/GameBoard';
 import WinnerOverlay from '../components/WinnerOverlay';
 import MovingCard from '../components/MovingCard';
+import PlayerNameForm from '../components/PlayerNameForm';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
 import './GamePage.scss';
 
@@ -11,10 +12,31 @@ function GamePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const gameboardRef = useRef(null);
+  const [showNameForm, setShowNameForm] = useState(false);
+  const [playerName, setPlayerName] = useState('');
   
   // Get parameters from URL or use defaults
   const playerCount = parseInt(searchParams.get('playerCount') || '4', 10);
   const startDealtCardsCount = parseInt(searchParams.get('startDealtCardsCount') || '8', 10);
+  const urlPlayerName = searchParams.get('playerName') || '';
+
+  useEffect(() => {
+    // Check if player name exists in localStorage or URL
+    const storedName = localStorage.getItem('playerName');
+    if (urlPlayerName) {
+      setPlayerName(urlPlayerName);
+    } else if (storedName) {
+      setPlayerName(storedName);
+    } else {
+      setShowNameForm(true);
+    }
+  }, [urlPlayerName]);
+
+  const handleNameSubmit = (name) => {
+    localStorage.setItem('playerName', name);
+    setPlayerName(name);
+    setShowNameForm(false);
+  };
 
   const {
     deck,
@@ -30,16 +52,20 @@ function GamePage() {
     initializeGame,
     restartGame,
     error,
+    playerNames,
   } = useRemoteGameEngine({
     gameId, 
     playerCount, 
     startDealtCardsCount,
+    playerName,
   });
 
   useEffect(() => {
-    // Initialize the game when the component mounts
-    initializeGame();
-  }, [gameId, playerCount, startDealtCardsCount]);
+    // Initialize the game when the component mounts and player name is set
+    if (playerName) {
+      initializeGame();
+    }
+  }, [gameId, playerCount, startDealtCardsCount, playerName, initializeGame]);
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
@@ -84,6 +110,14 @@ function GamePage() {
     navigate('/');
   };
 
+  if (showNameForm) {
+    return (
+      <div className="game-page name-form-container">
+        <PlayerNameForm onSubmit={handleNameSubmit} />
+      </div>
+    );
+  }
+
   return (
     <div className="game-page" ref={gameboardRef}>
       <div className="game-header">
@@ -107,6 +141,7 @@ function GamePage() {
         onPlayCard={onPlayCard}
         onSkipTurn={onSkipTurn}
         deck={deck}
+        playerNames={playerNames}
       />
       
       {winner !== null && (
@@ -114,6 +149,7 @@ function GamePage() {
           winner={winner} 
           onRestart={restartGame}
           onExit={handleBackToHome}
+          playerNames={playerNames}
         />
       )}
       

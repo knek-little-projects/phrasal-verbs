@@ -10,9 +10,11 @@ export default function GameBoard({
   players, 
   currentPlayer, 
   tableCards, 
+  cardPositions, 
   onPlayCard,
   onSkipTurn,
   deck,
+  playerNames = []
 }) {
   const showSkipOption = true;
 
@@ -21,6 +23,12 @@ export default function GameBoard({
   }
 
   const randomizedCardPositions = utils.generateCardPositions(tableCards.length, 30, 30, 20);
+
+  const getPlayerName = (index) => {
+    return playerNames && playerNames.length > index 
+      ? playerNames[index] 
+      : `Player ${index + 1}`;
+  };
 
   return (
     <div className="game-board">
@@ -32,7 +40,7 @@ export default function GameBoard({
         <CardHeap tableCards={tableCards} cardPositions={randomizedCardPositions} />
       </div>
 
-      <div className="player-name">{`Player ${currentPlayer + 1}`}</div>
+      <div className="player-name">{getPlayerName(currentPlayer)}</div>
 
       <OpenHand 
         cards={players[currentPlayer]?.cards || []}
