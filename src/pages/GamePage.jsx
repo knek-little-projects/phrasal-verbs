@@ -14,6 +14,7 @@ function GamePage() {
   const gameboardRef = useRef(null);
   const [showNameForm, setShowNameForm] = useState(false);
   const [playerName, setPlayerName] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
   
   // Get parameters from URL or use defaults
   const playerCount = parseInt(searchParams.get('playerCount') || '4', 10);
@@ -50,9 +51,12 @@ function GamePage() {
     handlePlayCard,
     handleSkipTurn,
     initializeGame,
+    joinGame,
     restartGame,
     error,
     playerNames,
+    joinedPlayers,
+    gameStarted,
   } = useRemoteGameEngine({
     gameId, 
     playerCount, 
@@ -66,6 +70,17 @@ function GamePage() {
       initializeGame();
     }
   }, [gameId, playerCount, startDealtCardsCount, playerName, initializeGame]);
+
+  const handleJoinGame = async () => {
+    try {
+      setIsJoining(true);
+      await joinGame();
+    } catch (error) {
+      console.error('Failed to join game:', error);
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
@@ -114,6 +129,52 @@ function GamePage() {
     return (
       <div className="game-page name-form-container">
         <PlayerNameForm onSubmit={handleNameSubmit} />
+      </div>
+    );
+  }
+
+  // Show waiting screen if the game hasn't started yet
+  if (!gameStarted) {
+    return (
+      <div className="game-page waiting-screen">
+        <div className="waiting-container">
+          <h2>Game: {gameId}</h2>
+          <p className="waiting-message">
+            Waiting for players to join ({joinedPlayers}/{playerCount})
+          </p>
+          
+          <div className="player-list">
+            <h3>Players:</h3>
+            <ul>
+              {playerNames.slice(0, joinedPlayers).map((name, index) => (
+                <li key={index} className="player-item">
+                  {name}
+                </li>
+              ))}
+              {Array(playerCount - joinedPlayers).fill().map((_, index) => (
+                <li key={`empty-${index}`} className="player-item empty">
+                  Waiting for player...
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          {!isJoining && joinedPlayers < playerCount && (
+            <button 
+              className="join-button"
+              onClick={handleJoinGame}
+              disabled={isJoining}
+            >
+              Join Game
+            </button>
+          )}
+          
+          <button className="back-button" onClick={() => navigate('/')}>
+            Back to Home
+          </button>
+        </div>
       </div>
     );
   }

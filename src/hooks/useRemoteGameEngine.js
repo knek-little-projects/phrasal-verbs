@@ -18,6 +18,9 @@ export function useRemoteGameEngine({
   const [movingCard, setMovingCard] = useState(null);
   const [error, setError] = useState(null);
   const [playerNames, setPlayerNames] = useState([]);
+  const [joinedPlayers, setJoinedPlayers] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
 
   const initializeGame = useCallback(async () => {
     try {
@@ -41,22 +44,130 @@ export function useRemoteGameEngine({
       
       const data = await response.json();
       
-      setDeck(data.deck);
-      setPlayers(data.players);
-      setCurrentPlayer(data.currentPlayer);
-      setTableCards(data.tableCards);
-      setCardPositions(data.cardPositions);
+      setDeck(data.deck || []);
+      setPlayers(data.players || []);
+      setCurrentPlayer(data.currentPlayer || 0);
+      setTableCards(data.tableCards || []);
+      setCardPositions(data.cardPositions || []);
       setWinner(data.winner);
       setPlayerNames(data.playerNames || []);
+      setJoinedPlayers(data.joinedPlayers || 0);
+      setGameStarted(data.gameStarted || false);
+      
+      // Start polling if the game hasn't started yet
+      if (!data.gameStarted && data.joinedPlayers < data.playerCount) {
+        setIsPolling(true);
+      } else {
+        setIsPolling(false);
+      }
     } catch (error) {
       setError('Unable to connect to game server. Please check your connection and try again.');
       console.error('Failed to initialize game:', error);
     }
   }, [gameId, playerCount, startDealtCardsCount, playerName]);
 
+  const joinGame = async () => {
+    try {
+      setError(null);
+      const response = await fetch(`${API_BASE_URL}/game/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gameId,
+          playerName,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to join game');
+      }
+      
+      const data = await response.json();
+      
+      setDeck(data.deck || []);
+      setPlayers(data.players || []);
+      setCurrentPlayer(data.currentPlayer || 0);
+      setTableCards(data.tableCards || []);
+      setCardPositions(data.cardPositions || []);
+      setWinner(data.winner);
+      setPlayerNames(data.playerNames || []);
+      setJoinedPlayers(data.joinedPlayers || 0);
+      setGameStarted(data.gameStarted || false);
+      
+      // Start polling if the game hasn't started yet
+      if (!data.gameStarted && data.joinedPlayers < data.playerCount) {
+        setIsPolling(true);
+      } else {
+        setIsPolling(false);
+      }
+      
+      return data;
+    } catch (error) {
+      setError(error.message || 'Failed to join game. Please try again.');
+      console.error('Failed to join game:', error);
+      throw error;
+    }
+  };
+
+  const checkGameStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/game/status?gameId=${gameId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to check game status');
+      }
+      
+      const data = await response.json();
+      
+      if (data.exists) {
+        setJoinedPlayers(data.joinedPlayers || 0);
+        setGameStarted(data.started || false);
+        setPlayerNames(data.playerNames || []);
+        
+        // If the game has started, fetch the full game state
+        if (data.started && !gameStarted) {
+          await initializeGame();
+        }
+        
+        // Stop polling if the game has started
+        if (data.started) {
+          setIsPolling(false);
+        }
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Failed to check game status:', error);
+      return null;
+    }
+  }, [gameId, gameStarted, initializeGame]);
+
+  // Set up polling for game status
   useEffect(() => {
-    initializeGame();
-  }, [initializeGame]);
+    let intervalId;
+    
+    if (isPolling) {
+      intervalId = setInterval(() => {
+        checkGameStatus();
+      }, 2000); // Poll every 2 seconds
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isPolling, checkGameStatus]);
+
+  useEffect(() => {
+    // Initialize the game when the component mounts
+    if (gameId && playerName) {
+      initializeGame();
+    }
+  }, [gameId, playerName, initializeGame]);
 
   const getRandomShift = () => {
     const getRandomShiftValue = () => {
@@ -221,8 +332,12 @@ export function useRemoteGameEngine({
     handlePlayCard,
     handleSkipTurn,
     initializeGame,
+    joinGame,
     restartGame,
     error,
     playerNames,
+    joinedPlayers,
+    playerCount,
+    gameStarted,
   };
 } 

@@ -22,12 +22,15 @@ class GameState:
         self.winner = None
         self.last_played_time = datetime.datetime.now().isoformat()
         self.player_names = ["Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6"][:player_count]
+        self.joined_players = 0  # Track how many players have joined
+        self.game_started = False  # Track if the game has started
         
         # Load verbs data
         with open(VERBS_FILE) as f:
             self.verbs_data = json.load(f)
             
-        self.initialize_game()
+        # Don't initialize the game yet, wait until all players join
+        # self.initialize_game()
 
     def initialize_game(self):
         # Create deck similar to React version
@@ -68,6 +71,7 @@ class GameState:
         self.table_cards = []
         self.card_positions = []
         self.winner = None
+        self.game_started = True
 
         # Check for winner after initialization
         for player in self.players:
@@ -114,13 +118,18 @@ def initialize_game():
         game = game_states[game_id]
         game.last_played_time = datetime.datetime.now().isoformat()
         
-        # Update player name if provided
-        if player_name and player_name != 'Player 1':
-            if player_name not in game.player_names:
-                for i in range(len(game.player_names)):
-                    if game.player_names[i].startswith('Player '):
-                        game.player_names[i] = player_name
-                        break
+        # If the game hasn't started yet, add the player
+        if not game.game_started and game.joined_players < game.player_count:
+            # Update player name if provided
+            if player_name and player_name != 'Player 1':
+                game.player_names[game.joined_players] = player_name
+            
+            # Increment joined players count
+            game.joined_players += 1
+            
+            # If all players have joined, initialize the game
+            if game.joined_players == game.player_count:
+                game.initialize_game()
         
         return jsonify({
             'deck': game.deck,
@@ -129,24 +138,82 @@ def initialize_game():
             'tableCards': game.table_cards,
             'cardPositions': game.card_positions,
             'winner': game.winner,
-            'playerNames': game.player_names
+            'playerNames': game.player_names,
+            'joinedPlayers': game.joined_players,
+            'playerCount': game.player_count,
+            'gameStarted': game.game_started
         })
     
     # Initialize a new game if it doesn't exist
     game_states[game_id] = GameState(player_count, start_dealt_cards)
+    game = game_states[game_id]
     
     # Set the first player's name if provided
     if player_name and player_name != 'Player 1':
-        game_states[game_id].player_names[0] = player_name
+        game.player_names[0] = player_name
+    
+    # Mark the first player as joined
+    game.joined_players = 1
+    
+    # If only one player is needed, start the game immediately
+    if game.player_count == 1:
+        game.initialize_game()
     
     return jsonify({
-        'deck': game_states[game_id].deck,
-        'players': game_states[game_id].players,
-        'currentPlayer': game_states[game_id].current_player,
-        'tableCards': game_states[game_id].table_cards,
-        'cardPositions': game_states[game_id].card_positions,
-        'winner': game_states[game_id].winner,
-        'playerNames': game_states[game_id].player_names
+        'deck': game.deck,
+        'players': game.players,
+        'currentPlayer': game.current_player,
+        'tableCards': game.table_cards,
+        'cardPositions': game.card_positions,
+        'winner': game.winner,
+        'playerNames': game.player_names,
+        'joinedPlayers': game.joined_players,
+        'playerCount': game.player_count,
+        'gameStarted': game.game_started
+    })
+
+@app.route('/api/game/join', methods=['POST'])
+def join_game():
+    data = request.json
+    game_id = data.get('gameId')
+    player_name = data.get('playerName', '')
+    
+    if game_id not in game_states:
+        return jsonify({'error': 'Game not found'}), 404
+    
+    game = game_states[game_id]
+    game.last_played_time = datetime.datetime.now().isoformat()
+    
+    # Check if the game is already full
+    if game.joined_players >= game.player_count:
+        return jsonify({'error': 'Game is full'}), 400
+    
+    # Check if the game has already started
+    if game.game_started:
+        return jsonify({'error': 'Game has already started'}), 400
+    
+    # Update player name if provided
+    if player_name and player_name != 'Player 1':
+        game.player_names[game.joined_players] = player_name
+    
+    # Increment joined players count
+    game.joined_players += 1
+    
+    # If all players have joined, initialize the game
+    if game.joined_players == game.player_count:
+        game.initialize_game()
+    
+    return jsonify({
+        'deck': game.deck,
+        'players': game.players,
+        'currentPlayer': game.current_player,
+        'tableCards': game.table_cards,
+        'cardPositions': game.card_positions,
+        'winner': game.winner,
+        'playerNames': game.player_names,
+        'joinedPlayers': game.joined_players,
+        'playerCount': game.player_count,
+        'gameStarted': game.game_started
     })
 
 @app.route('/api/game/play-card', methods=['POST'])
@@ -205,9 +272,16 @@ def check_game_status():
     game_id = request.args.get('gameId')
     
     if game_id in game_states:
-        return jsonify({'started': True}), 200
+        game = game_states[game_id]
+        return jsonify({
+            'exists': True,
+            'started': game.game_started,
+            'joinedPlayers': game.joined_players,
+            'playerCount': game.player_count,
+            'playerNames': game.player_names
+        }), 200
     else:
-        return jsonify({'started': False}), 404
+        return jsonify({'exists': False, 'started': False}), 404
 
 @app.route('/api/game/restart', methods=['POST'])
 def restart_game():
@@ -237,11 +311,13 @@ def get_active_games():
         active_games.append({
             'id': game_id,
             'playerCount': game.player_count,
+            'joinedPlayers': game.joined_players,
             'startDealtCardsCount': game.start_dealt_cards_count,
             'currentPlayer': game.current_player,
             'hasWinner': game.winner is not None,
             'lastPlayedTime': game.last_played_time,
-            'playerNames': game.player_names
+            'playerNames': game.player_names,
+            'gameStarted': game.game_started
         })
     
     # Sort by last played time (newest first) and limit to 100

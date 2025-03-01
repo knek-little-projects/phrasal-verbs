@@ -56,13 +56,16 @@ function JoinGamePage() {
     }
   };
 
-  const getPlayerNamesString = (playerNames) => {
+  const getPlayerNamesString = (playerNames, joinedPlayers) => {
     if (!playerNames || playerNames.length === 0) return 'No players';
     
-    // Filter out default player names
-    const customNames = playerNames.filter(name => !name.match(/^Player \d+$/));
+    // Only show joined players
+    const joinedNames = playerNames.slice(0, joinedPlayers);
     
-    if (customNames.length === 0) return `${playerNames.length} players`;
+    // Filter out default player names
+    const customNames = joinedNames.filter(name => !name.match(/^Player \d+$/));
+    
+    if (customNames.length === 0) return `${joinedPlayers} players`;
     
     if (customNames.length <= 2) {
       return customNames.join(', ');
@@ -109,7 +112,10 @@ function JoinGamePage() {
                 <div className="game-info">
                   <span className="game-name">{game.id}</span>
                   <span className="player-count">
-                    {getPlayerNamesString(game.playerNames)}
+                    {getPlayerNamesString(game.playerNames, game.joinedPlayers)}
+                  </span>
+                  <span className="game-status">
+                    {game.gameStarted ? 'In progress' : `Waiting (${game.joinedPlayers}/${game.playerCount})`}
                   </span>
                   <span className="last-played">
                     Last activity: {formatTime(game.lastPlayedTime)}
@@ -118,8 +124,9 @@ function JoinGamePage() {
                 <button 
                   className="join-button"
                   onClick={() => handleJoinGame(game.id)}
+                  disabled={game.gameStarted && game.joinedPlayers >= game.playerCount}
                 >
-                  Join
+                  {game.gameStarted ? 'Spectate' : 'Join'}
                 </button>
               </li>
             ))}
