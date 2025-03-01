@@ -4,11 +4,15 @@ const API_BASE_URL = 'http://localhost:5000/api';
 
 export function useRemoteGameEngine({
   gameId, 
+  playerName,
   playerCount = 4, 
   startDealtCardsCount = 8,
-  playerName = '',
   timeout = 1000,
 }) {
+  if (!playerName) {
+    throw new Error('playerName is required');
+  }
+
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState(0);

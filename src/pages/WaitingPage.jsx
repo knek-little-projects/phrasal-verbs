@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRemoteGameEngine } from '../hooks/useRemoteGameEngine';
+import { useInterval } from '../hooks/useInterval';
 import './WaitingPage.scss';
 
-function WaitingPage() {
+export default function WaitingPage() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [joinError, setJoinError] = useState(null);
+  const [hasJoined, setHasJoined] = useState(false);
   
   const {
     error,
@@ -18,48 +21,46 @@ function WaitingPage() {
     getGameState,
   } = useRemoteGameEngine({
     gameId,
+    playerName: localStorage.getItem('playerName'),
   });
 
   useEffect(() => {
-    const checkGame = async () => {
-      try {
-        setLoading(true);
-        // Get the current game state
-        await getGameState();
-        setLoading(false);
-      } catch (error) {
-        console.error("Error getting game state:", error);
-        setLoading(false);
+    const attemptJoinGame = async () => {
+      if (!hasJoined) {
+        console.log(`Attempting to join game: ${gameId}`);
+        try {
+          await joinGame();
+          setHasJoined(true);
+          console.log(`Successfully joined game: ${gameId}`);
+        } catch (error) {
+          setJoinError("Failed to join the game. Please try again.");
+          console.error("Error joining game:", error);
+        }
       }
     };
-    
-    checkGame();
-  }, [getGameState]);
+
+    attemptJoinGame();
+  }, [gameId, hasJoined, joinGame]);
+
+  useInterval(async () => {
+    console.log("Fetching game state...");
+    try {
+      setLoading(true);
+      await getGameState();
+      setLoading(false);
+      console.log("Game state fetched successfully.");
+    } catch (error) {
+      console.error("Error getting game state:", error);
+      setLoading(false);
+    }
+  }, 1000);
 
   useEffect(() => {
     if (gameStarted) {
-      // Redirect to game page when the game starts
+      console.log(`Game has started. Redirecting to game page: ${gameId}`);
       navigate(`/game/${gameId}`);
     }
   }, [gameStarted, navigate, gameId]);
-
-  const handleJoinGame = async () => {
-    try {
-      await joinGame();
-    } catch (error) {
-      console.error("Error joining game:", error);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="waiting-page">
-        <div className="waiting-container">
-          <h2>Loading game...</h2>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="waiting-page">
@@ -86,15 +87,7 @@ function WaitingPage() {
         </div>
         
         {error && <div className="error-message">{error}</div>}
-        
-        {joinedPlayers < playerCount && (
-          <button 
-            className="join-button"
-            onClick={handleJoinGame}
-          >
-            Join Game
-          </button>
-        )}
+        {joinError && <div className="error-message">{joinError}</div>}
         
         <button className="back-button" onClick={() => navigate('/')}>
           Back to Home
@@ -103,5 +96,3 @@ function WaitingPage() {
     </div>
   );
 }
-
-export default WaitingPage; 
