@@ -26,8 +26,10 @@ function OpenHand({
   };
 
   const handleSkipClick = () => {
-    onSkipTurn();
-    setSelectedCardIndex(null);
+    if (playable) {
+      onSkipTurn();
+      setSelectedCardIndex(null);
+    }
   };
 
   return (
@@ -45,11 +47,11 @@ function OpenHand({
               card={card}
               faceDown={false}
               onClick={() => handleCardClick(index)}
-              disabled={!isCardPlayable(card)}
+              disabled={playable && !isCardPlayable(card)}
             />
           </div>
         ))}
-        {showSkipOption && <div className="card skip-card" onClick={handleSkipClick}>Skip</div>}
+        {showSkipOption && playable && <div className="card skip-card" onClick={handleSkipClick}>Skip</div>}
       </div>
     </div>
   );

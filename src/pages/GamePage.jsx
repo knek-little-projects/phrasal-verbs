@@ -99,7 +99,7 @@ export default function GamePage() {
   return (
     <div className="game-page" ref={gameboardRef}>
       <div className="game-header">
-        <h2>Game: {gameId}</h2>
+        <h2>{gameId}</h2>
         <button className="back-button" onClick={handleBackToHome}>
           Exit Game
         </button>
