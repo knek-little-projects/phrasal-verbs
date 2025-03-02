@@ -9,6 +9,15 @@
     font-size: 1rem;
     font-weight: bold;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+
+    &.active {
+      background: rgba(255, 215, 0, 0.2);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      animation: namePulse 2s infinite;
+    }
 
     @media (max-width: 768px) {
       font-size: 0.9rem;
@@ -18,5 +27,35 @@
   .opponent-cards {
     display: flex;
     justify-content: center;
+  }
+
+  &.active {
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    border-radius: 8px;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+}
+
+@keyframes namePulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
   }
 } 

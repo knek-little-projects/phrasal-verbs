@@ -33,7 +33,12 @@ export default function GameBoard({
 
   return (
     <div className="game-board">
-      <OpponentList players={players} playerNames={playerNames} excludePlayerIndex={thisPlayerIndex} />
+      <OpponentList 
+        players={players} 
+        playerNames={playerNames} 
+        excludePlayerIndex={thisPlayerIndex}
+        currentPlayer={currentPlayer}
+      />
 
       <div className="table">
         {deck.length > 0 && <Deck count={deck.length} />}
@@ -41,7 +46,11 @@ export default function GameBoard({
         <CardHeap tableCards={tableCards} cardPositions={randomizedCardPositions} />
       </div>
 
-      <div className="player-name">{getPlayerName(thisPlayerIndex)}</div>
+      <div className='player-name-wrapper'>
+        <div className={`player-name ${isMyTurn ? 'active' : ''}`}>
+          {getPlayerName(thisPlayerIndex)}
+        </div>
+      </div>
 
       <OpenHand
         cards={players[thisPlayerIndex]?.cards || []}

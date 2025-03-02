@@ -10,6 +10,7 @@ function OpenHand({
   isCardPlayable,
   showSkipOption,
   playable,
+  isActive,
 }) {
   const [selectedCardIndex, setSelectedCardIndex] = React.useState(null);
 
@@ -30,7 +31,7 @@ function OpenHand({
   };
 
   return (
-    <div className="open-hand">
+    <div className={`open-hand ${isActive ? 'active' : ''}`}>
       <div className="player-cards">
         {cards.map((card, index) => (
           <div 

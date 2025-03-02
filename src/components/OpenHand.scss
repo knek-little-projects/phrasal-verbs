@@ -79,6 +79,24 @@ $card-offset-mobile: -15px;
   //     background: #c0392b;
   //   }
   // }
+
+  &.active {
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    border-radius: 8px;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
 }
 
 .cards-container {

@@ -1,7 +1,7 @@
 import React from 'react';
 import OpponentHand from './OpponentHand';
 
-const OpponentList = ({ players, playerNames, excludePlayerIndex }) => {
+const OpponentList = ({ players, playerNames, excludePlayerIndex, currentPlayer }) => {
   return (
     <div className="opponents">
       {players.map((player, index) => (
@@ -10,6 +10,7 @@ const OpponentList = ({ players, playerNames, excludePlayerIndex }) => {
             key={player.id}
             cards={player.cards}
             playerName={playerNames[player.id] || `???`}
+            isActive={currentPlayer === player.id}
           />
         )
       ))}
