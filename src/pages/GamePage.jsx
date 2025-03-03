@@ -13,7 +13,7 @@ export default function GamePage() {
   const navigate = useNavigate();
   const gameboardRef = useRef(null);
   const { playerName } = useLogin();
-  
+
   const {
     gameState,
     movingCard,
@@ -29,8 +29,19 @@ export default function GamePage() {
     }
   }, [gameState, gameId, navigate]);
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <div className="error">
+        {error}
+        <div className="buttons-wrapper">
+          <button className="home-button" onClick={handleBackToHome}>Return Home</button>
+        </div>
+      </div>
+    );
   }
 
   if (!gameState) {
@@ -56,7 +67,7 @@ export default function GamePage() {
   const getElementPosition = (element) => {
     const rect = element.getBoundingClientRect();
     const gameboardRect = gameboardRef.current.getBoundingClientRect();
-    
+
     return {
       x: rect.left - gameboardRect.left + rect.width / 2,
       y: rect.top - gameboardRect.top + rect.height / 2
@@ -66,12 +77,12 @@ export default function GamePage() {
   const onPlayCard = (cardIndex) => {
     const cardElement = gameboardRef.current.querySelector('.open-hand .player-cards .card-wrapper.selected .card');
     const tableElement = gameboardRef.current.querySelector('.table');
-    
+
     if (!cardElement || !tableElement) return;
 
     const startPos = getElementPosition(cardElement);
     const tablePos = getElementPosition(tableElement);
-    
+
     handlePlayCard(cardIndex, startPos, tablePos);
   };
 
@@ -83,28 +94,24 @@ export default function GamePage() {
 
     const deckElement = gameboardRef.current.querySelector('.deck');
     const playerHandElement = gameboardRef.current.querySelector('.open-hand');
-    
+
     if (!deckElement || !playerHandElement) return;
 
     const deckPos = getElementPosition(deckElement);
     const handPos = getElementPosition(playerHandElement);
-    
-    handleSkipTurn(deckPos, handPos);
-  };
 
-  const handleBackToHome = () => {
-    navigate('/');
+    handleSkipTurn(deckPos, handPos);
   };
 
   return (
     <div className="game-page" ref={gameboardRef}>
       <div className="game-header">
         <h2>{gameId}</h2>
-        <button className="back-button" onClick={handleBackToHome}>
-          Exit Game
+        <button className="home-button" onClick={handleBackToHome}>
+          Return Home
         </button>
       </div>
-      
+
       <GameBoard
         players={players}
         currentPlayer={currentPlayer}
@@ -117,23 +124,23 @@ export default function GamePage() {
         isMyTurn={isMyTurn}
         thisPlayerIndex={thisPlayerIndex}
       />
-      
+
       {winner !== null && (
-        <WinnerOverlay 
-          winner={winner} 
+        <WinnerOverlay
+          winner={winner}
           onRestart={restartGame}
           onExit={handleBackToHome}
           playerNames={playerNames}
         />
       )}
-      
+
       {movingCard && (
         <MovingCard
           card={movingCard.card}
           startPosition={movingCard.startPos}
           endPosition={movingCard.endPos}
           rotation={movingCard.rotation}
-          onAnimationEnd={() => {/* handle animation end */}}
+          onAnimationEnd={() => {/* handle animation end */ }}
         />
       )}
     </div>

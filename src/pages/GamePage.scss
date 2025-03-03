@@ -151,4 +151,33 @@
       }
     }
   }
-} 
+}
+
+.error {
+  text-align: center;
+}
+
+.buttons-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.home-button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: #357abd;
+    }
+
+    &:active {
+        background-color: #2a5f96;
+    }
+}
