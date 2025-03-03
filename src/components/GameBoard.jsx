@@ -43,7 +43,7 @@ export default function GameBoard({
         />
       </div>
 
-      <div className="row">
+      <div className="row table-row">
         <div className="table">
           {deck.length > 0 && <Deck count={deck.length} />}
 
