@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.c6cd12db.css",
-    "main.js": "/static/js/main.1473e6d7.js",
-    "static/js/453.ace3e5dd.chunk.js": "/static/js/453.ace3e5dd.chunk.js",
-    "index.html": "/index.html",
-    "main.c6cd12db.css.map": "/static/css/main.c6cd12db.css.map",
-    "main.1473e6d7.js.map": "/static/js/main.1473e6d7.js.map",
-    "453.ace3e5dd.chunk.js.map": "/static/js/453.ace3e5dd.chunk.js.map"
+    "main.css": "/phrasal-verbs/static/css/main.c6cd12db.css",
+    "main.js": "/phrasal-verbs/static/js/main.f88c23ad.js",
+    "static/js/453.ace3e5dd.chunk.js": "/phrasal-verbs/static/js/453.ace3e5dd.chunk.js",
+    "index.html": "/phrasal-verbs/index.html",
+    "main.c6cd12db.css.map": "/phrasal-verbs/static/css/main.c6cd12db.css.map",
+    "main.f88c23ad.js.map": "/phrasal-verbs/static/js/main.f88c23ad.js.map",
+    "453.ace3e5dd.chunk.js.map": "/phrasal-verbs/static/js/453.ace3e5dd.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c6cd12db.css",
-    "static/js/main.1473e6d7.js"
+    "static/js/main.f88c23ad.js"
   ]
 }
