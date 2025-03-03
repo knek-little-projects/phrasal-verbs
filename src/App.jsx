@@ -8,7 +8,7 @@ import './App.scss';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/phrasal-verbs">
       <div className="app">
         <Routes>
           <Route path="/" element={<HomePage />} />
