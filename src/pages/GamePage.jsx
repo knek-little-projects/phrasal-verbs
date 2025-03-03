@@ -106,9 +106,9 @@ export default function GamePage() {
   return (
     <div className="game-page" ref={gameboardRef}>
       <div className="game-header">
-        <h2>{gameId}</h2>
-        <button className="home-button" onClick={handleBackToHome}>
-          Return Home
+        <h2>{currentPlayerName} &mdash; your move!</h2>
+        <button onClick={handleBackToHome}>
+          EXIT GAME
         </button>
       </div>
 
