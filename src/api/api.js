@@ -1,4 +1,8 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://my-test-server.ru/api' 
+  : 'http://localhost:5000/api'
+
+console.log(`This is ${process.env.NODE_ENV} environment. Using API base URL: ${API_BASE_URL}`);
 
 export const initializeGame = async ({
   gameId, 

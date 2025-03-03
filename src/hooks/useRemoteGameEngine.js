@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as api from '../api'; // Import all API functions from the index.js file
-import GameState from './GameState'; // Import the GameState class
 
-const API_BASE_URL = 'http://localhost:5000/api';
 const POLL_INTERVAL = 2000; // Poll every 2 seconds
 
 export function useRemoteGameEngine({
