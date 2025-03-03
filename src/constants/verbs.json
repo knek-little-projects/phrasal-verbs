@@ -1,57 +1,206 @@
 {
-  "categories": [
-    {
-      "name": "General",
-      "color": "rgba(52, 152, 219, 0.5)",
-      "matches": [
-        "Travel",
-        "Relationships",
-        "Daily Life",
-        "Business",
-        "General"
-      ],
-      "cards": [
-        {
-          "phrasal_verb": "COME ABOUT",
-          "related_words": [
-            "Unexpected event",
-            "Change in plans",
-            "Decision made",
-            "New opportunity",
-            "Surprising outcome"
-          ]
-        },
-        {
-          "phrasal_verb": "BRING UP",
-          "related_words": [
-            "A topic in conversation",
-            "An issue to discuss",
-            "A question to ask",
-            "A concern to address",
-            "A point to mention"
-          ]
-        },
-        {
-          "phrasal_verb": "LOOK FOR",
-          "related_words": [
-            "A book to read",
-            "A job to apply for",
-            "Answers to find",
-            "A place to visit",
-            "Help to receive"
-          ]
-        },
-        {
-          "phrasal_verb": "TAKE UP",
-          "related_words": [
-            "A new hobby",
-            "An interest to explore",
-            "A sport to play",
-            "A challenge to face",
-            "A course to enroll in"
-          ]
-        }
-      ]
-    }
-  ]
-}
+    "categories": [
+      {
+        "name": "General",
+        "color": "rgba(52, 152, 219, 0.5)",
+        "matches": [
+          "Travel",
+          "Relationships",
+          "Daily Life",
+          "Business",
+          "General"
+        ],
+        "cards": [
+          {
+            "phrasal_verb": "COME ABOUT",
+            "related_words": [
+              "Unexpected event",
+              "Change in plans",
+              "Decision made",
+              "New opportunity",
+              "Surprising outcome"
+            ]
+          },
+          {
+            "phrasal_verb": "BRING UP",
+            "related_words": [
+              "A topic in conversation",
+              "An issue to discuss",
+              "A question to ask",
+              "A concern to address",
+              "A point to mention"
+            ]
+          },
+          {
+            "phrasal_verb": "LOOK FOR",
+            "related_words": [
+              "A book to read",
+              "A job to apply for",
+              "Answers to find",
+              "A place to visit",
+              "Help to receive"
+            ]
+          },
+          {
+            "phrasal_verb": "TAKE UP",
+            "related_words": [
+              "A new hobby",
+              "An interest to explore",
+              "A sport to play",
+              "A challenge to face",
+              "A course to enroll in"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Travel",
+        "color": "rgba(46, 104, 73, 0.5)",
+        "cards": [
+          {
+            "phrasal_verb": "GO IN FOR",
+            "related_words": ["Exploring", "Groups", "Spontaneous trips", "Beach", "Swimming"]
+          },
+          {
+            "phrasal_verb": "GO AROUND",
+            "related_words": ["Back", "Square", "Left", "City", "Country"]
+          },
+          {
+            "phrasal_verb": "GO THROUGH",
+            "related_words": ["Security", "Customs", "Screening", "Line", "Check-in"]
+          },
+          {
+            "phrasal_verb": "GO BACK",
+            "related_words": ["Terminal", "Seat", "Home", "Gate", "Check-in"]
+          },
+          {
+            "phrasal_verb": "GET AWAY / GETAWAY",
+            "related_words": ["Turkey", "Office", "A break", "Perfect", "Deal"]
+          },
+          {
+            "phrasal_verb": "GET ON",
+            "related_words": ["Wrong side", "Plane", "Flight", "Train", "Bus"]
+          },
+          {
+            "phrasal_verb": "GET OFF",
+            "related_words": ["Next stop", "Plane", "Train", "Bus", "Shuttle"]
+          },
+          {
+            "phrasal_verb": "GET IN",
+            "related_words": ["Earlier", "Once", "At 6:30 PM", "Flight", "Hotel"]
+          },
+          {
+            "phrasal_verb": "COME ACROSS",
+            "related_words": ["Other tourists", "Deal", "Old friend", "Café", "Great deal"]
+          },
+          {
+            "phrasal_verb": "GET AROUND",
+            "related_words": ["Easily", "Airport", "Terminals", "City", "On foot"]
+          }
+        ]
+      },
+      {
+        "name": "Relationships",
+        "color": "rgba(231, 76, 60, 0.5)",
+        "cards": [
+          {
+            "phrasal_verb": "GO THROUGH",
+            "related_words": ["Ups and downs", "Misunderstandings", "Difficult period", "Lot of emotions", "Divorce"]
+          },
+          {
+            "phrasal_verb": "CAN'T GET OVER",
+            "related_words": ["Funny", "Break-up", "Her/Him", "Stupid", "Pain"]
+          },
+          {
+            "phrasal_verb": "GO OUT",
+            "related_words": ["Lovers", "They", "For a year", "Asked", "Sometime"]
+          },
+          {
+            "phrasal_verb": "COME AROUND",
+            "related_words": ["Stubborn", "He/She", "Eventually", "Opinion", "View"]
+          },
+          {
+            "phrasal_verb": "COME DOWN TO",
+            "related_words": ["Being there for each other", "Whether", "Love", "Respect", "Trust"]
+          },
+          {
+            "phrasal_verb": "GET ALONG",
+            "related_words": ["Because", "Friends", "Can disagree", "So well", "Different"]
+          },
+          {
+            "phrasal_verb": "GET THROUGH",
+            "related_words": ["Support", "Anything", "Worst times", "Breakup", "Managed"]
+          },
+          {
+            "phrasal_verb": "GET TOGETHER",
+            "related_words": ["Every Friday", "Holiday", "For dinner", "Catch up", "Celebrate"]
+          },
+          {
+            "phrasal_verb": "COME OVER",
+            "related_words": ["Surprise", "Relax", "Together", "For dinner", "Friend"]
+          },
+          {
+            "phrasal_verb": "MAKE OUT",
+            "related_words": ["With him/her", "Date", "Watching", "Then", "In public/rain"]
+          }
+        ]
+      },
+      {
+        "name": "Daily Life",
+        "color": "rgba(141, 106, 15, 0.5)",
+        "cards": [
+          {
+            "phrasal_verb": "COME OFF",
+            "related_words": ["Stain", "Plan", "Presentation", "Surprise", "Substance"]
+          },
+          {
+            "phrasal_verb": "MAKE UP FOR",
+            "related_words": ["Quality", "Lack", "Time", "Price", "Mistakes"]
+          },
+          {
+            "phrasal_verb": "MAKE OUT",
+            "related_words": ["Club", "Dude", "Lyrics", "Crime", "Handwriting"]
+          },
+          {
+            "phrasal_verb": "COME UP AGAINST",
+            "related_words": ["Vampires", "Tyranny", "Problem", "COVID", "Hard times"]
+          },
+          {
+            "phrasal_verb": "COME OUT",
+            "related_words": ["Song", "Patch", "Report", "News", "Update"]
+          }
+        ]
+      },
+      {
+        "name": "Business",
+        "color": "rgba(155, 89, 182, 0.5)",
+        "cards": [
+          {
+            "phrasal_verb": "GO THROUGH WITH",
+            "related_words": ["Quitting", "Plan", "Merge", "Bankruptcy", "Laying"]
+          },
+          {
+            "phrasal_verb": "GET AROUND SMTH.",
+            "related_words": ["NDA", "Bug", "Problem", "Algorithm", "Crisis"]
+          },
+          {
+            "phrasal_verb": "GET AROUND TO",
+            "related_words": ["Arrange", "Pile", "Report", "Project", "Assign"]
+          },
+          {
+            "phrasal_verb": "GO ABOUT",
+            "related_words": ["Homework", "Audit", "Meeting", "E-mail", "Colleague"]
+          },
+          {
+            "phrasal_verb": "GO THROUGH",
+            "related_words": ["Financial crisis", "Report", "Code", "Papers", "Negotiations"]
+          },
+          {
+            "phrasal_verb": "GO OVER",
+            "related_words": ["Sales figures", "Plan", "Notes", "Details", "Emails"]
+          }
+        ]
+      }
+    ]
+  }
+  
