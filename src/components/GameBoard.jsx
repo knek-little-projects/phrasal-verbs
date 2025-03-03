@@ -34,7 +34,7 @@ export default function GameBoard({
   return (
     <div className="game-board">
 
-      <div className="row">
+      <div className="row opponents-row">
         <OpponentList
           players={players}
           playerNames={playerNames}

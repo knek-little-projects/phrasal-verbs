@@ -3,7 +3,7 @@ import Card from './Card';
 
 const CardHeap = ({ tableCards, cardPositions }) => {
   return (
-    <>
+    <div className="card-heap">
       {tableCards.map((card, index) => {
         const { x, y, rotation } = cardPositions[index] || { x: 0, y: 0, rotation: 0 };
         return (
@@ -20,7 +20,7 @@ const CardHeap = ({ tableCards, cardPositions }) => {
           </div>
         );
       })}
-    </>
+    </div>
   );
 };
 
