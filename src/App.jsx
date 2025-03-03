@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import NewGamePage from './pages/NewGamePage';
 import JoinGamePage from './pages/JoinGamePage';
@@ -8,7 +8,7 @@ import './App.scss';
 
 function App() {
   return (
-    <BrowserRouter basename="/phrasal-verbs">
+    <HashRouter>
       <div className="app">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -16,9 +16,10 @@ function App() {
           <Route path="/join" element={<JoinGamePage />} />
           <Route path="/game/:gameId" element={<GamePage />} />
           <Route path="/waiting/:gameId" element={<WaitingPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
