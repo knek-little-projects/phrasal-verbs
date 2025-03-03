@@ -1,14 +1,23 @@
+"""
+Usage:
+  app.py [--prod]
+
+Options:
+  --prod  Run the app in production mode with SSL.
+"""
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import random
 import json
 import os
 import datetime
+from docopt import docopt  # Import docopt
 
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 VERBS_FILE = os.path.join(os.path.dirname(__file__), '../src/constants/verbs.json')
+
 
 class GameState:
     def __init__(self, player_count, start_dealt_cards_count, game_id):
@@ -314,4 +323,15 @@ def get_game_state():
     return jsonify(game.to_dict())
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    arguments = docopt(__doc__)  # Parse the command-line arguments
+
+    if arguments['--prod']:
+        ssl_context = ( 
+            "/etc/letsencrypt/live/my-test-server.ru/fullchain.pem",
+            "/etc/letsencrypt/live/my-test-server.ru/privkey.pem"
+        )
+        host = "0.0.0.0"
+        port = 443
+        app.run(ssl_context=ssl_context, host=host, port=port)
+    else:
+        app.run(debug=True)  # Run in debug mode if not in production 
