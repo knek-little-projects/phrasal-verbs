@@ -12,9 +12,16 @@ $card-offset-mobile: -15px;
   gap: 10px;
   max-width: 100%;
   
+  // Set position to fixed to keep it visible
+  position: fixed; // Change to fixed
+  bottom: 0; // Align to the bottom of the viewport
+  left: 0; // Align to the left of the viewport
+  right: 0; // Align to the right of the viewport
+  z-index: 1000; // Ensure it appears above other elements
+
   // Adjust padding to better show cards
   padding-top: 20px;
-  padding-bottom: 140px;
+  padding-bottom: 20px; // Adjust as needed
 
   &::-webkit-scrollbar {
     display: none;
