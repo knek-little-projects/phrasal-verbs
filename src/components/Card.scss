@@ -164,11 +164,16 @@ $card-category-color: #7f8c8d;
   }
 
   &.disabled {
-    background: rgba(128, 128, 128, 1);
-    opacity: 1;
+    // background: rgba(210, 210, 210, 1);
+    // opacity: 1;
+    background-color: #f0f0f0;
+
+    .card-main-content{
+      opacity: 0.40;
+    }
 
     .card-content {
-      opacity: 0.5;
+      opacity: 0.80;
     }
 
     cursor: not-allowed;

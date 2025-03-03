@@ -47,7 +47,7 @@ function OpenHand({
               card={card}
               faceDown={false}
               onClick={() => handleCardClick(index)}
-              disabled={playable && !isCardPlayable(card)}
+              disabled={!playable || !isCardPlayable(card)}
             />
           </div>
         ))}
