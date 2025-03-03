@@ -12,9 +12,9 @@ $card-offset-mobile: -15px;
   gap: 10px;
   max-width: 100%;
   
-  // Add padding to accommodate rotated cards
+  // Adjust padding to better show cards
   padding-top: 40px;
-  padding-bottom: 40px;
+  padding-bottom: 100px;
 
   &::-webkit-scrollbar {
     display: none;
@@ -34,7 +34,7 @@ $card-offset-mobile: -15px;
     }
 
     .card-wrapper {
-      transform-origin: center 120%;
+      transform-origin: center 100%;
       transition: transform 0.3s ease;
       margin-left: $card-offset; // Add negative margin
 
