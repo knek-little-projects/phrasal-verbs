@@ -25,9 +25,16 @@ export const initializeGame = async ({
       playerName,
     }),
   });
+  
   if (!response.ok) {
-    throw new Error('Failed to connect to game server');
+    const errorData = await response.json();
+    // Check for specific error message when game already exists
+    if (response.status === 400 && errorData.error === 'Game already exists.') {
+      throw new Error('Game already exists');
+    }
+    throw new Error(errorData.error || 'Failed to connect to game server');
   }
+  
   return await response.json();
 };
 

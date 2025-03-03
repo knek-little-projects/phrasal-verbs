@@ -35,7 +35,13 @@ function NewGamePage() {
       // Navigate to the waiting page after successful initialization
       navigate(`/waiting/${gameId}`);
     } catch (error) {
-      setError(error.message || 'Failed to create game. Please try again.');
+
+      // Check for specific error message when game already exists
+      if (error.message.includes('Game already exists')) {
+        setError('A game with this name already exists. Please choose a different name.');
+      } else {
+        setError(error.message || 'Failed to create game. Please try again.');
+      }
       console.error('Failed to create game:', error);
     } finally {
       setIsCreating(false);
