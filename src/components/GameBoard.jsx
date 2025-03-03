@@ -6,10 +6,10 @@ import './GameBoard.scss';
 import * as utils from '../utils';
 
 
-export default function GameBoard({ 
-  players, 
-  currentPlayer, 
-  tableCards, 
+export default function GameBoard({
+  players,
+  currentPlayer,
+  tableCards,
   onPlayCard,
   onSkipTurn,
   deck,
@@ -26,40 +26,49 @@ export default function GameBoard({
   const randomizedCardPositions = utils.generateCardPositions(tableCards.length, 30, 30, 20);
 
   const getPlayerName = (index) => {
-    return playerNames && playerNames.length > index 
-      ? playerNames[index] 
+    return playerNames && playerNames.length > index
+      ? playerNames[index]
       : `???`;
   };
 
   return (
     <div className="game-board">
-      <OpponentList 
-        players={players} 
-        playerNames={playerNames} 
-        excludePlayerIndex={thisPlayerIndex}
-        currentPlayer={currentPlayer}
-      />
 
-      <div className="table">
-        {deck.length > 0 && <Deck count={deck.length} />}
-        
-        <CardHeap tableCards={tableCards} cardPositions={randomizedCardPositions} />
+      <div className="row">
+        <OpponentList
+          players={players}
+          playerNames={playerNames}
+          excludePlayerIndex={thisPlayerIndex}
+          currentPlayer={currentPlayer}
+        />
       </div>
 
-      <div className='player-name-wrapper'>
-        <div className={`player-name ${isMyTurn ? 'active' : ''}`}>
-          {getPlayerName(thisPlayerIndex)}
+      <div className="row">
+        <div className="table">
+          {deck.length > 0 && <Deck count={deck.length} />}
+
+          <CardHeap tableCards={tableCards} cardPositions={randomizedCardPositions} />
         </div>
       </div>
 
-      <OpenHand
-        cards={players[thisPlayerIndex]?.cards || []}
-        onPlayCard={onPlayCard}
-        onSkipTurn={onSkipTurn}
-        isCardPlayable={isCardPlayable}
-        showSkipOption={showSkipOption}
-        playable={isMyTurn}
-      />
+      <div className="row">
+        <div className="player-wrapper">
+          <div className='player-name-wrapper'>
+            <div className={`player-name ${isMyTurn ? 'active' : ''}`}>
+              {getPlayerName(thisPlayerIndex)}
+            </div>
+          </div>
+
+          <OpenHand
+            cards={players[thisPlayerIndex]?.cards || []}
+            onPlayCard={onPlayCard}
+            onSkipTurn={onSkipTurn}
+            isCardPlayable={isCardPlayable}
+            showSkipOption={showSkipOption}
+            playable={isMyTurn}
+          />
+        </div>
+      </div>
     </div>
   );
 }
